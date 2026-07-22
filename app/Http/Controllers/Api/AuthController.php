@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
-use App\Models\User;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -37,24 +37,25 @@ class AuthController extends Controller
                 'user' => $data['user'],
                 'token' => $data['token'],
             ],
-        ]);
+        ], 200);
     }
 
-    public function logout(User $user)
+    public function logout(Request $request)
     {
-        $this->authService->logout($user);
+        $this->authService->logout($request->user());
         return response()->json([
             'success' => true,
             'message' => 'Đăng xuất thành công',
             'data' => null,
-        ]);
+        ], 200);
     }
 
-    public function show(User $user) {
+    public function show(Request $request)
+    {
         return response()->json([
             'success' => true,
             'message' => 'Lấy thông tin người dùng thành công',
-            'data' => $user,
-        ]);
+            'data' => $request->user(),
+        ], 200);
     }
 }

@@ -12,7 +12,7 @@ class StoreTaskRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,28 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'due_date' => 'required|date',
+        ];
+    }
+
+    public function messages(): array {
+        return [
+            'title.required' => 'Tiêu đề không được để trống',
+            'title.max' => 'Tiêu đề không được vượt quá 255 ký tự',
+            'description.required' => 'Mô tả không được để trống',
+            'description.max' => 'Mô tả không được vượt quá 255 ký tự',
+            'due_date.required' => 'Ngày hết hạn không được để trống',
+            'due_date.date' => 'Ngày hết hạn không hợp lệ',
+        ];
+    }
+
+    public function attributes(): array {
+        return [
+            'title' => 'Tiêu đề',
+            'description' => 'Mô tả',
+            'due_date' => 'Ngày hết hạn',
         ];
     }
 }

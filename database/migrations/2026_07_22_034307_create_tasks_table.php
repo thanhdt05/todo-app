@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('status')->default('todo');
             $table->timestamp('due_date')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->index(['user_id', 'status']);
         });
     }
