@@ -41,8 +41,8 @@ class TaskService
         $task = Task::create([
             'user_id' => $user->id,
             'title' => $data['title'],
-            'description' => $data['description'],
-            'due_date' => $data['due_date'],
+            'description' => $data['description'] ?? null,
+            'due_date' => $data['due_date'] ?? null,
         ]);
 
         return $task;
