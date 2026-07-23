@@ -70,6 +70,12 @@ PUT /api/tasks/{id}/restore
 → Task::where('id', $id)->first()->restore()
 → JSON 200
 
+PUT /api/tasks/{id}/complete
+→ TaskController@complete
+→ TaskService@complete(user, id)
+→ Task::where('id', $id)->first()->update(...)
+→ JSON 200
+
 DELETE /api/tasks/{id}
 → TaskController@delete
 → TaskService@delete(user, id)
@@ -81,3 +87,54 @@ DELETE /api/tasks/{id}/force
 → TaskService@forceDelete(user, id)
 → Task::where('id', $id)->first()->forceDelete()
 → JSON 200
+
+## Hướng dẫn chạy dự án
+
+### Yêu cầu
+
+Git
+Docker
+Docker compose
+
+### Clone project
+
+git clone https://github.com/thanhdt05/todo-app.git
+cd todo-app
+
+### Copy .env.example sang file mới .env
+
+### Build và chạy container
+
+```bash
+docker compose up -d --build
+```
+
+### Install composer dependencies
+
+```bash
+docker compose exec todoapp composer install
+```
+
+### Generate key
+
+```bash
+docker compose exec todoapp php artisan key:generate
+```
+
+### Migrate database
+
+```bash
+docker compose exec todoapp php artisan migrate
+```
+
+### Seed database
+
+```bash
+docker compose exec todoapp php artisan db:seed
+```
+
+### Test
+
+```bash
+docker compose exec todoapp php artisan test
+```

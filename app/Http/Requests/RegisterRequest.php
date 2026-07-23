@@ -26,21 +26,26 @@ class RegisterRequest extends FormRequest
             "name" => "required|string|max:255",
             "email" => "required|email|string|max:255|unique:users,email",
             "password" => "required|string|min:8|max:255",
+            "password_confirmation" => "required|string|min:8|max:255|same:password",
         ];
     }
 
     public function messages(): array
     {
         return [
-            "name.required" => "Name is required",
-            "name.max" => "Name must be at most 255 characters long",
-            "email.required" => "Email is required",
-            "email.max" => "Email must be at most 255 characters long",
-            "email.email" => "Email is invalid",
-            "email.unique" => "Email already exists",
-            "password.required" => "Password is required",
-            "password.min" => "Password must be at least 8 characters long",
-            "password.max" => "Password must be at most 255 characters long",
+            "name.required" => "Tên không được để trống",
+            "name.max" => "Tên không được vượt quá 255 ký tự",
+            "email.required" => "Email không được để trống",
+            "email.max" => "Email không được vượt quá 255 ký tự",
+            "email.email" => "Email không hợp lệ",
+            "email.unique" => "Email đã tồn tại",
+            "password.required" => "Password không được để trống",
+            "password.min" => "Password phải có ít nhất 8 ký tự",
+            "password.max" => "Password không được vượt quá 255 ký tự",
+            "password_confirmation.required" => "Xác nhận password không được để trống",
+            "password_confirmation.min" => "Xác nhận password phải có ít nhất 8 ký tự",
+            "password_confirmation.max" => "Xác nhận password không được vượt quá 255 ký tự",
+            "password_confirmation.same" => "Xác nhận password không khớp",
         ];
     }
 
@@ -50,6 +55,7 @@ class RegisterRequest extends FormRequest
             "name" => "Name",
             "email" => "Email",
             "password" => "Password",
+            "password_confirmation" => "Password Confirmation",
         ];
     }
 }

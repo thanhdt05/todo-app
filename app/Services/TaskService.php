@@ -6,8 +6,22 @@ use App\Models\User;
 use App\Models\Task;
 
 class TaskService {
-    public function getAll(User $user) {
-        return $user->tasks()->latest()->get();
+    public function getAll(User $user, array $filters) {
+        $query = $user->tasks()->latest();
+
+        if(!empty($filters['status'])) {
+            $query = $query->where('status', $filters['status']);
+        }
+
+        if(!empty($filters['q'])) {
+            $keyword = $filters['q'];
+
+            $query->where(function($query) use ($keyword) {
+                $query->where('title', 'like', "%$keyword%")->orWhere('description', 'like', "%$keyword%");
+            });
+        }
+
+        return $query->paginate(20);
     }
 
     public function findById(User $user, string $id) {
@@ -38,9 +52,21 @@ class TaskService {
     }
 
     public function restore(User $user, string $id) {
-        $task = $user->tasks()->withTrashed()->findOrFail($id);
+        $task = $this->findDeletedById($user, $id);
 
         $task->restore();
+
+        return $task;
+    }
+
+    public function complete(User $user, string $id) {
+        $task = $this->findById($user, $id);
+
+        $task->update([
+            'status' => 'done',
+            'completed_at' => now(),
+            'is_overdue' => $task->due_date < now(),
+        ]);
 
         return $task;
     }
@@ -52,8 +78,8 @@ class TaskService {
     }
 
     public function forceDelete(User $user, string $id) {
-        $task = $user->tasks()->withTrashed()->findOrFail($id);
+        $task = $this->findDeletedById($user, $id);
 
         $task->forceDelete();
     }
-} 
+}
