@@ -29,7 +29,8 @@ class StoreTaskRequest extends FormRequest
         ];
     }
 
-    public function messages(): array {
+    public function messages(): array
+    {
         return [
             'title.required' => 'Tiêu đề không được để trống',
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự',
@@ -40,7 +41,8 @@ class StoreTaskRequest extends FormRequest
         ];
     }
 
-    public function attributes(): array {
+    public function attributes(): array
+    {
         return [
             'title' => 'Tiêu đề',
             'description' => 'Mô tả',

@@ -2,17 +2,16 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 class BasicFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testCanRegister()
+    public function test_can_register()
     {
         $this->assertGuest();
 
@@ -24,17 +23,16 @@ class BasicFeatureTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'data' => ['user', 'token']
-                ]);
+            ->assertJsonStructure([
+                'data' => ['user', 'token'],
+            ]);
 
         $this->assertDatabaseHas('users', [
             'email' => 'testregister@example.com',
         ]);
     }
 
-
-    public function testCanLogin()
+    public function test_can_login()
     {
         $this->assertGuest();
         $user = User::factory()->create([
@@ -49,7 +47,7 @@ class BasicFeatureTest extends TestCase
             ->assertJsonStructure(['data' => ['token']]);
     }
 
-    public function testUserCannotLoginWithIncorrectPassword()
+    public function test_user_cannot_login_with_incorrect_password()
     {
         $this->assertGuest();
         $user = User::factory()->create([
@@ -61,12 +59,12 @@ class BasicFeatureTest extends TestCase
             'password' => 'invalid-password',
         ]);
 
-        $response->assertStatus(422) 
-         ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
 
     }
 
-    public function testCanGetProfileMe()
+    public function test_can_get_profile_me()
     {
         $user = User::factory()->create();
 
@@ -76,8 +74,7 @@ class BasicFeatureTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'message',
-                'data' => ['id', 'name', 'email']
+                'data' => ['id', 'name', 'email'],
             ]);
     }
-
 }

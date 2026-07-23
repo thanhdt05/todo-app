@@ -2,17 +2,16 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
 use App\Models\Task;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class TasksFeatureTest extends TestCase
 {
     use RefreshDatabase;
-    public function testCanCreateTask()
+
+    public function test_can_create_task()
     {
         $user = User::factory()->create();
 
@@ -26,11 +25,12 @@ class TasksFeatureTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'message',
-                'data' => ['id', 'title', 'description', 'due_date']
+                'data' => ['id', 'title', 'description', 'due_date'],
             ]);
     }
 
-    public function testCanGetAllTasks(){
+    public function test_can_get_all_tasks()
+    {
         $user = User::factory()->create();
         Task::factory()->count(3)->create([
             'user_id' => $user->id,
@@ -39,29 +39,30 @@ class TasksFeatureTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')->getJson('/api/tasks');
 
         $response->assertStatus(200)
-        ->assertJsonStructure([
-            'success',
-            'message',
-            'data' => [
-                'current_page',
+            ->assertJsonStructure([
+                'success',
+                'message',
                 'data' => [
-                    '*' => [
-                        'id',
-                        'title',
-                        'description',
-                        'status',
-                        'due_date',
-                        'is_overdue',
-                    ]
+                    'current_page',
+                    'data' => [
+                        '*' => [
+                            'id',
+                            'title',
+                            'description',
+                            'status',
+                            'due_date',
+                            'is_overdue',
+                        ],
+                    ],
+                    'last_page',
+                    'per_page',
+                    'total',
                 ],
-                'last_page',
-                'per_page',
-                'total',
-            ]
-        ]);
+            ]);
     }
 
-    public function testCanGetWithFiltersTasks(){
+    public function test_can_get_with_filters_tasks()
+    {
         $user = User::factory()->create();
         Task::factory()->count(3)->create([
             'user_id' => $user->id,
@@ -71,52 +72,53 @@ class TasksFeatureTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')->getJson('/api/tasks?status=doing&q=Tes');
 
         $response->assertStatus(200)
-        ->assertJsonStructure([
-            'success',
-            'message',
-            'data' => [
-                'current_page',
-                'data' => [
-                    '*' => [
-                        'id',
-                        'title',
-                        'description',
-                        'status',
-                        'due_date',
-                        'is_overdue',
-                    ]
-                ],
-                'last_page',
-                'per_page',
-                'total',
-            ]
-        ]);
-    }
-
-    public function testCanGetTaskById(){
-        $user = User::factory()->create();
-        $task = Task::factory()->create([
-            'user_id' => $user->id,
-        ]);
-
-        $response = $this->actingAs($user, 'sanctum')->getJson('/api/tasks/' . $task->id);
-
-        $response->assertStatus(200)
             ->assertJsonStructure([
                 'success',
                 'message',
-                'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue']
+                'data' => [
+                    'current_page',
+                    'data' => [
+                        '*' => [
+                            'id',
+                            'title',
+                            'description',
+                            'status',
+                            'due_date',
+                            'is_overdue',
+                        ],
+                    ],
+                    'last_page',
+                    'per_page',
+                    'total',
+                ],
             ]);
     }
 
-    public function testCanUpdateTask()
+    public function test_can_get_task_by_id()
     {
         $user = User::factory()->create();
         $task = Task::factory()->create([
             'user_id' => $user->id,
         ]);
 
-        $response = $this->actingAs($user, 'sanctum')->putJson('/api/tasks/' . $task->id, [
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/tasks/'.$task->id);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue'],
+            ]);
+    }
+
+    public function test_can_update_task()
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/tasks/'.$task->id, [
             'title' => 'Test Task Updated',
             'description' => 'Test Task Description Updated',
             'due_date' => now()->addDays(7),
@@ -126,17 +128,18 @@ class TasksFeatureTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'message',
-                'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue']
+                'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue'],
             ]);
     }
 
-    public function testCanDeleteTask(){
+    public function test_can_delete_task()
+    {
         $user = User::factory()->create();
         $task = Task::factory()->create([
             'user_id' => $user->id,
         ]);
 
-        $response = $this->actingAs($user, 'sanctum')->deleteJson('/api/tasks/' . $task->id);
+        $response = $this->actingAs($user, 'sanctum')->deleteJson('/api/tasks/'.$task->id);
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -145,31 +148,33 @@ class TasksFeatureTest extends TestCase
             ]);
     }
 
-    public function testCanRestoreTask(){
-        $user = User::factory()->create();
-        $task = Task::factory()->create([
-            'user_id' => $user->id,
-            'deleted_at' => now(),
-        ]);
-
-        $response = $this->actingAs($user, 'sanctum')->putJson('/api/tasks/' . $task->id . '/restore');
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'success',
-                'message',
-                'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue']
-            ]);
-    }
-
-    public function testCanForceDeleteTask(){
+    public function test_can_restore_task()
+    {
         $user = User::factory()->create();
         $task = Task::factory()->create([
             'user_id' => $user->id,
             'deleted_at' => now(),
         ]);
 
-        $response = $this->actingAs($user, 'sanctum')->deleteJson('/api/tasks/' . $task->id . '/force');
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/tasks/'.$task->id.'/restore');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue'],
+            ]);
+    }
+
+    public function test_can_force_delete_task()
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create([
+            'user_id' => $user->id,
+            'deleted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->deleteJson('/api/tasks/'.$task->id.'/force');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -178,20 +183,20 @@ class TasksFeatureTest extends TestCase
             ]);
     }
 
-    public function testCanCompletedTask(){
+    public function test_can_completed_task()
+    {
         $user = User::factory()->create();
         $task = Task::factory()->create([
             'user_id' => $user->id,
         ]);
 
-        $response = $this->actingAs($user, 'sanctum')->putJson('/api/tasks/' . $task->id . '/complete');
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/tasks/'.$task->id.'/complete');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'success',
                 'message',
-                'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue']
+                'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue'],
             ]);
     }
-    
 }

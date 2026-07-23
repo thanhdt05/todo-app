@@ -4,10 +4,9 @@ namespace App\Policies;
 
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TaskPolicy
-{   
+{
     /**
      * Determine whether the user can view any models.
      */
@@ -39,7 +38,6 @@ class TaskPolicy
     {
         return $user->id === $task->user_id;
     }
-    
 
     /**
      * Determine whether the user can delete the model.

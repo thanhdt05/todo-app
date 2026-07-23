@@ -30,7 +30,8 @@ class UpdateTaskRequest extends FormRequest
         ];
     }
 
-    public function messages(): array {
+    public function messages(): array
+    {
         return [
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự',
             'description.max' => 'Mô tả không được vượt quá 255 ký tự',
@@ -39,7 +40,8 @@ class UpdateTaskRequest extends FormRequest
         ];
     }
 
-    public function attributes(): array {
+    public function attributes(): array
+    {
         return [
             'title' => 'Tiêu đề',
             'description' => 'Mô tả',

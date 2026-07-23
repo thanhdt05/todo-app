@@ -23,28 +23,28 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "email" => "required|email|string|max:255",
-            "password" => "required|string|min:8|max:255",
+            'email' => 'required|email|string|max:255',
+            'password' => 'required|string|min:8|max:255',
         ];
     }
 
     public function messages(): array
     {
         return [
-            "email.required" => "Email không được để trống",
-            "email.max" => "Email không được vượt quá 255 ký tự",
-            "email.email" => "Email không hợp lệ",
-            "password.required" => "Password không được để trống",
-            "password.min" => "Password phải có ít nhất 8 ký tự",
-            "password.max" => "Password không được vượt quá 255 ký tự",
+            'email.required' => 'Email không được để trống',
+            'email.max' => 'Email không được vượt quá 255 ký tự',
+            'email.email' => 'Email không hợp lệ',
+            'password.required' => 'Password không được để trống',
+            'password.min' => 'Password phải có ít nhất 8 ký tự',
+            'password.max' => 'Password không được vượt quá 255 ký tự',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            "email" => "Email",
-            "password" => "Password",
+            'email' => 'Email',
+            'password' => 'Password',
         ];
     }
 }

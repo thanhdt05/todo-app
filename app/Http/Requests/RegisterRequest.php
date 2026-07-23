@@ -23,39 +23,39 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => "required|string|max:255",
-            "email" => "required|email|string|max:255|unique:users,email",
-            "password" => "required|string|min:8|max:255",
-            "password_confirmation" => "required|string|min:8|max:255|same:password",
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|string|max:255|unique:users,email',
+            'password' => 'required|string|min:8|max:255',
+            'password_confirmation' => 'required|string|min:8|max:255|same:password',
         ];
     }
 
     public function messages(): array
     {
         return [
-            "name.required" => "Tên không được để trống",
-            "name.max" => "Tên không được vượt quá 255 ký tự",
-            "email.required" => "Email không được để trống",
-            "email.max" => "Email không được vượt quá 255 ký tự",
-            "email.email" => "Email không hợp lệ",
-            "email.unique" => "Email đã tồn tại",
-            "password.required" => "Password không được để trống",
-            "password.min" => "Password phải có ít nhất 8 ký tự",
-            "password.max" => "Password không được vượt quá 255 ký tự",
-            "password_confirmation.required" => "Xác nhận password không được để trống",
-            "password_confirmation.min" => "Xác nhận password phải có ít nhất 8 ký tự",
-            "password_confirmation.max" => "Xác nhận password không được vượt quá 255 ký tự",
-            "password_confirmation.same" => "Xác nhận password không khớp",
+            'name.required' => 'Tên không được để trống',
+            'name.max' => 'Tên không được vượt quá 255 ký tự',
+            'email.required' => 'Email không được để trống',
+            'email.max' => 'Email không được vượt quá 255 ký tự',
+            'email.email' => 'Email không hợp lệ',
+            'email.unique' => 'Email đã tồn tại',
+            'password.required' => 'Password không được để trống',
+            'password.min' => 'Password phải có ít nhất 8 ký tự',
+            'password.max' => 'Password không được vượt quá 255 ký tự',
+            'password_confirmation.required' => 'Xác nhận password không được để trống',
+            'password_confirmation.min' => 'Xác nhận password phải có ít nhất 8 ký tự',
+            'password_confirmation.max' => 'Xác nhận password không được vượt quá 255 ký tự',
+            'password_confirmation.same' => 'Xác nhận password không khớp',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            "name" => "Name",
-            "email" => "Email",
-            "password" => "Password",
-            "password_confirmation" => "Password Confirmation",
+            'name' => 'Name',
+            'email' => 'Email',
+            'password' => 'Password',
+            'password_confirmation' => 'Password Confirmation',
         ];
     }
 }

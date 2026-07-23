@@ -17,6 +17,7 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         $data = $this->authService->register($request->validated());
+
         return response()->json([
             'success' => true,
             'message' => 'Đăng ký thành công',
@@ -30,6 +31,7 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         $data = $this->authService->login($request->validated());
+
         return response()->json([
             'success' => true,
             'message' => 'Đăng nhập thành công',
@@ -43,6 +45,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $this->authService->logout($request->user());
+
         return response()->json([
             'success' => true,
             'message' => 'Đăng xuất thành công',
