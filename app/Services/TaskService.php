@@ -23,7 +23,7 @@ class TaskService
             });
         }
 
-        return $query->paginate(20);
+        return $query->paginate(5);
     }
 
     public function findById(User $user, string $id)

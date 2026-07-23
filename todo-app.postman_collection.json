@@ -196,8 +196,8 @@
 					}
 				],
 				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"12345678\"\n}"
+					"mode": "urlencoded",
+					"urlencoded": []
 				},
 				"url": {
 					"raw": "http://localhost:8000/api/me",
@@ -216,6 +216,23 @@
 		},
 		{
 			"name": "Create Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();",
+							"",
+							"if (response.data.id) {",
+							"    pm.environment.set(\"id\", response.data.id);",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -306,7 +323,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8000/api/tasks/22",
+					"raw": "http://localhost:8000/api/tasks/{{id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -315,7 +332,7 @@
 					"path": [
 						"api",
 						"tasks",
-						"22"
+						"{{id}}"
 					]
 				}
 			},
@@ -346,7 +363,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8000/api/tasks/22",
+					"raw": "http://localhost:8000/api/tasks/{{id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -355,7 +372,7 @@
 					"path": [
 						"api",
 						"tasks",
-						"22"
+						"{{id}}"
 					]
 				}
 			},
@@ -381,7 +398,7 @@
 					"raw": "{\n    \"description\": \"Cấu hình Docker Compose cho Laravel updated\"\n}"
 				},
 				"url": {
-					"raw": "http://localhost:8000/api/tasks/22",
+					"raw": "http://localhost:8000/api/tasks/{{id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -390,7 +407,7 @@
 					"path": [
 						"api",
 						"tasks",
-						"22"
+						"{{id}}"
 					]
 				}
 			},
@@ -412,7 +429,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8000/api/auth/tasks/5/force",
+					"raw": "http://localhost:8000/api/tasks/{{id}}/force",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -420,9 +437,8 @@
 					"port": "8000",
 					"path": [
 						"api",
-						"auth",
 						"tasks",
-						"5",
+						"{{id}}",
 						"force"
 					]
 				}
@@ -454,7 +470,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8000/api/tasks/22/restore",
+					"raw": "http://localhost:8000/api/tasks/{{id}}/restore",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -463,7 +479,7 @@
 					"path": [
 						"api",
 						"tasks",
-						"22",
+						"{{id}}",
 						"restore"
 					]
 				}
@@ -536,7 +552,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8000/api/tasks/22/complete",
+					"raw": "http://localhost:8000/api/tasks/{{id}}/complete",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -545,8 +561,51 @@
 					"path": [
 						"api",
 						"tasks",
-						"22",
+						"{{id}}",
 						"complete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pagination",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\n  {\n    \"title\": \"Docker PostgreSQL\",\n    \"description\": \"Cấu hình Docker Compose cho Laravel\",\n    \"status\": \"done\",\n    \"due_date\": \"2026-07-25 10:30:00\"\n  }"
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/tasks?page=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						}
 					]
 				}
 			},
