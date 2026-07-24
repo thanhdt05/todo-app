@@ -23,14 +23,22 @@ class TaskService
             });
         }
 
-        return $query->paginate(5);
+        return $query->paginate(2);
     }
 
-    public function getAllTrashed(User $user)
+    public function getAllTrashed(User $user, array $filters)
     {
         $query = $user->tasks()->onlyTrashed()->latest();
 
-        return $query->paginate(5);
+        if (! empty($filters['q'])) {
+            $keyword = $filters['q'];
+
+            $query->where(function ($query) use ($keyword) {
+                $query->where('title', 'like', "%$keyword%")->orWhere('description', 'like', "%$keyword%");
+            });
+        }
+
+        return $query->paginate(2);
     }
 
     public function findById(User $user, string $id)

@@ -3,12 +3,14 @@ FROM php:8.4-cli
 RUN apt-get update && apt-get install -y \
     curl \
     libpq-dev \
+    libsqlite3-dev \
     zip \
     unzip \
     git \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
-    && docker-php-ext-install pdo pdo_pgsql
+    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite
+
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

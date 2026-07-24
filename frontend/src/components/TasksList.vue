@@ -28,7 +28,7 @@
 
         <!-- Task List Items -->
         <ul class="space-y-2.5">
-          <li v-for="task in filterTasks" :key="task.id" @click="openDetailModal(task)" class="flex items-center justify-between px-4 py-3.5 bg-[#f4f6f7] rounded-xl hover:bg-[#eaeef1] transition cursor-pointer">
+          <li v-for="task in tasks" :key="task.id" @click="openDetailModal(task)" class="flex items-center justify-between px-4 py-3.5 bg-[#f4f6f7] rounded-xl hover:bg-[#eaeef1] transition cursor-pointer">
             <!-- Left: Checkbox & Title -->
             <div class="flex items-center space-x-3.5 flex-1 min-w-0 pr-3">
               <input type="checkbox" :checked="task.status === 'done'" @change="handleToggleTask(task)" class="w-5 h-5 accent-blue-600 rounded cursor-pointer shrink-0" />
@@ -88,6 +88,14 @@
             </div>
           </li>
         </ul>
+
+        <Pagination 
+        :current-page="currentPage" 
+        :total-pages="lastPage" 
+        :total="totalTasks" 
+        @change="goTo"
+        />
+
     </div>
 
     <!-- Modal Tạo Mới -->
@@ -222,8 +230,9 @@
 <script setup lang="ts">
 import axios from 'axios'; 
 import { useRouter } from 'vue-router';
-import {ref, computed, onMounted} from 'vue';
+import {ref, computed, onMounted, watch} from 'vue';
 import TaskSearch from './TaskSearch.vue';
+import Pagination from './Pagination.vue';
 
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -345,6 +354,14 @@ const filterTasks = computed(() => {
     })
 })
 
+const currentPage = ref(1)
+const lastPage = ref(1)
+const totalTasks = ref(0)
+
+const goTo = (page: number) => {
+    handleGetTasksList(page)
+}
+
 const handleApiError = (error: any, defaultMessage: string) => {
     if (error.response?.data) {
         if (error.response.data.errors) {
@@ -362,7 +379,11 @@ const handleApiError = (error: any, defaultMessage: string) => {
     }
 }
 
-const handleGetTasksList = async() => {
+watch([keyword, currentTab], () => {
+    handleGetTasksList()
+})
+
+const handleGetTasksList = async(page: number = 1) => {
     try {
         errorMessage.value = ''
         successMessage.value = ''
@@ -374,7 +395,16 @@ const handleGetTasksList = async() => {
             return
         }
 
+        const params: any = { page }
+        if (keyword.value) {
+            params.q = keyword.value
+        }
+        if (currentTab.value !== 'ALL') {
+            params.status = currentTab.value.toLowerCase() 
+        }
+
         const response = await axios.get('http://localhost:8000/api/tasks', {
+            params,
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json'
@@ -383,6 +413,9 @@ const handleGetTasksList = async() => {
         
         if (response.data?.data){
             tasks.value = response.data.data.data
+            currentPage.value = response.data.data.current_page
+            lastPage.value = response.data.data.last_page
+            totalTasks.value = response.data.data.total
             successMessage.value = response.data.message || 'Lấy danh sách công việc thành công'
         }
     } catch (error: any) {

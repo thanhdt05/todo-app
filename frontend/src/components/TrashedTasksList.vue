@@ -27,7 +27,7 @@
 
         <!-- Task List Items -->
         <ul class="space-y-2.5">
-          <li v-for="task in filterTasks" :key="task.id" class="flex items-center justify-between px-4 py-3.5 bg-[#f4f6f7] rounded-xl hover:bg-[#eaeef1] transition">
+          <li v-for="task in tasks" :key="task.id" class="flex items-center justify-between px-4 py-3.5 bg-[#f4f6f7] rounded-xl hover:bg-[#eaeef1] transition">
             <div class="flex items-center space-x-3.5 flex-1 min-w-0 pr-3">
               <input type="checkbox" :value="task.id" v-model="selectedTaskIds" class="w-5 h-5 accent-blue-600 rounded cursor-pointer shrink-0" />
               <span class="truncate text-sm sm:text-base text-slate-700 font-medium">
@@ -85,6 +85,13 @@
             </div>
           </li>
         </ul>
+
+        <Pagination 
+        :current-page="currentPage" 
+        :total-pages="lastPage" 
+        :total="totalTasks" 
+        @change="goTo"
+        />
     </div>
 
     <div 
@@ -127,9 +134,9 @@
 
 <script setup lang="ts">
 import axios from 'axios'; 
-import { useRouter } from 'vue-router';
-import {ref, computed, onMounted} from 'vue';
+import {ref, computed, onMounted, watch} from 'vue';
 import TaskSearch from './TaskSearch.vue';
+import Pagination from './Pagination.vue';
 
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -212,7 +219,19 @@ const handleApiError = (error: any, defaultMessage: string) => {
     }
 }
 
-const handleGetTasksList = async() => {
+const currentPage = ref(1)
+const lastPage = ref(1)
+const totalTasks = ref(0)
+
+const goTo = (page: number) => {
+  handleGetTasksList(page)
+}
+
+watch(keyword, () => {
+    handleGetTasksList()
+})
+
+const handleGetTasksList = async(page: number = 1) => {
     try {
         errorMessage.value = ''
         successMessage.value = ''
@@ -224,7 +243,13 @@ const handleGetTasksList = async() => {
             return
         }
 
+        const params: any = { page }
+        if (keyword.value) {
+            params.q = keyword.value
+        }
+
         const response = await axios.get('http://localhost:8000/api/tasks/trashed', {
+            params,
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json'
@@ -233,6 +258,9 @@ const handleGetTasksList = async() => {
         
         if (response.data?.data){
             tasks.value = response.data.data.data
+            currentPage.value = response.data.data.current_page
+            totalTasks.value = response.data.data.total
+            lastPage.value = response.data.data.last_page
             selectedTaskIds.value = []
             successMessage.value = response.data.message || 'Lấy danh sách công việc thành công'
         }
