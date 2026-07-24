@@ -109,6 +109,8 @@ Trong thư mục gốc của dự án đã chuẩn bị sẵn **Postman Collecti
     - **Tự động lưu Token:** Khi gửi request **Register** hoặc **Login**, script của Postman sẽ tự động trích xuất `token` từ Response và lưu vào môi trường. Tất cả các Request sau đó (`GET /api/tasks`, `POST /api/tasks`...) sẽ tự động đính kèm Token trong Header `Authorization: Bearer {{token}}`.
     - **Tự động lưu ID công việc:** Khi gửi request **POST /api/tasks** (Tạo task mới), script sẽ tự động gán ID của công việc vừa tạo vào biến `{{id}}`. Các API cập nhật/xóa sau đó (`PUT /api/tasks/{{id}}`, `DELETE /api/tasks/{{id}}`) sẽ tự động sử dụng ID này.
 
+Api test Postman: http://localhost:8000
+
 ## Hướng Dẫn Cài Đặt & Chạy Dự Án (Docker)
 
 ### Yêu cầu hệ thống:
@@ -155,33 +157,6 @@ docker compose exec todoapp php artisan db:seed
 ```
 
 ### 6. Chạy Test Suites
-
-#### ⚠️ Lưu Ý Về Môi Trường Test (`.env.testing`):
-
-Khi chạy `php artisan test`, các file test sử dụng trait `RefreshDatabase` sẽ tự động thực thi `php artisan migrate:fresh` để reset lại Database. Để bảo vệ dữ liệu MySQL chính không bị xóa sạch, hãy khởi tạo file **`.env.testing`** tại thư mục gốc:
-
-##### Cấu hình file `.env.testing`:
-
-```env
-APP_ENV=testing
-APP_KEY=base64:c29tZXJhbmRvbXN0cmluZ2ZvcmpzZWN1cml0eWtleTEyMw==
-
-DB_CONNECTION=sqlite
-DB_DATABASE=:memory:
-
-CACHE_STORE=array
-SESSION_DRIVER=array
-QUEUE_CONNECTION=sync
-```
-
-##### Cơ chế hoạt động:
-
-1. Khi chạy `php artisan test`, Laravel tự động nạp cấu hình từ file `.env.testing`.
-2. Khởi tạo Database SQLite tạm thời trên RAM (`:memory:`).
-3. Mọi thao tác `migrate:fresh` chỉ diễn ra trên RAM và tự hủy khi test hoàn thành.
-4. Database MySQL chính được bảo vệ an toàn 100%.
-
-##### Lệnh chạy test:
 
 ```bash
 docker compose exec todoapp php artisan test
