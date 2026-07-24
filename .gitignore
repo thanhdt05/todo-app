@@ -2,6 +2,8 @@
 .DS_Store
 .env*
 !.env.example
+!.env.testing
+
 .phpactor.json
 .phpunit.result.cache
 /.codex
