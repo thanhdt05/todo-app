@@ -379,8 +379,14 @@ const handleApiError = (error: any, defaultMessage: string) => {
     }
 }
 
+let searchTimer: any = null
+
 watch([keyword, currentTab], () => {
-    handleGetTasksList()
+    if (searchTimer) clearTimeout(searchTimer)
+    
+    searchTimer = setTimeout(() => {
+        handleGetTasksList(1)
+    }, 300)
 })
 
 const handleGetTasksList = async(page: number = 1) => {

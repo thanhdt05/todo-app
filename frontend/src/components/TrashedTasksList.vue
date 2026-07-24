@@ -227,9 +227,16 @@ const goTo = (page: number) => {
   handleGetTasksList(page)
 }
 
+let searchTimer: any = null
+
 watch(keyword, () => {
-    handleGetTasksList()
+    if (searchTimer) clearTimeout(searchTimer)
+
+    searchTimer = setTimeout(() => {
+        handleGetTasksList(1)
+    }, 300)
 })
+
 
 const handleGetTasksList = async(page: number = 1) => {
     try {

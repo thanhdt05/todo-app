@@ -16,14 +16,15 @@ class TaskService
         }
 
         if (! empty($filters['q'])) {
-            $keyword = $filters['q'];
+            $keyword = mb_strtolower($filters['q']);
 
             $query->where(function ($query) use ($keyword) {
-                $query->where('title', 'like', "%$keyword%")->orWhere('description', 'like', "%$keyword%");
+                $query->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"])
+                      ->orWhereRaw('LOWER(description) LIKE ?', ["%{$keyword}%"]);
             });
         }
 
-        return $query->paginate(2);
+        return $query->paginate(5);
     }
 
     public function getAllTrashed(User $user, array $filters)
@@ -31,15 +32,17 @@ class TaskService
         $query = $user->tasks()->onlyTrashed()->latest();
 
         if (! empty($filters['q'])) {
-            $keyword = $filters['q'];
+            $keyword = mb_strtolower($filters['q']);
 
             $query->where(function ($query) use ($keyword) {
-                $query->where('title', 'like', "%$keyword%")->orWhere('description', 'like', "%$keyword%");
+                $query->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"])
+                      ->orWhereRaw('LOWER(description) LIKE ?', ["%{$keyword}%"]);
             });
         }
 
-        return $query->paginate(2);
+        return $query->paginate(5);
     }
+
 
     public function findById(User $user, string $id)
     {
