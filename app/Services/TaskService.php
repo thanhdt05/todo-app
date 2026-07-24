@@ -26,6 +26,13 @@ class TaskService
         return $query->paginate(5);
     }
 
+    public function getAllTrashed(User $user)
+    {
+        $query = $user->tasks()->onlyTrashed()->latest();
+
+        return $query->paginate(5);
+    }
+
     public function findById(User $user, string $id)
     {
         return $user->tasks()->findOrFail($id);

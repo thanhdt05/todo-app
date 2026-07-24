@@ -127,14 +127,14 @@ docker compose exec todoapp php artisan key:generate
 docker compose exec todoapp php artisan migrate
 ```
 
-### Seed database
-
-```bash
-docker compose exec todoapp php artisan db:seed
-```
-
 ### Test
 
 ```bash
 docker compose exec todoapp php artisan test
+```
+
+### Seed database
+
+```bash
+docker compose exec todoapp php artisan db:seed
 ```

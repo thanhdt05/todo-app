@@ -110,6 +110,38 @@ class TasksFeatureTest extends TestCase
                 'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue'],
             ]);
     }
+    public function test_can_get_all_trashed_tasks()
+    {
+        $user = User::factory()->create();
+        Task::factory()->count(3)->create([
+            'user_id' => $user->id,
+            'deleted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/tasks/trashed');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'current_page',
+                    'data' => [
+                        '*' => [
+                            'id',
+                            'title',
+                            'description',
+                            'status',
+                            'due_date',
+                            'is_overdue',
+                        ],
+                    ],
+                    'last_page',
+                    'per_page',
+                    'total',
+                ],
+            ]);
+    }
 
     public function test_can_update_task()
     {

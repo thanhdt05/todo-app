@@ -15,9 +15,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('tasks')->group(function () {
         Route::get('/', [TaskController::class, 'index']);
+        Route::get('/trashed', [TaskController::class, 'getAllTrashedTasks']);
         Route::get('{id}', [TaskController::class, 'show']);
         Route::post('/', [TaskController::class, 'store']);
         Route::put('{id}', [TaskController::class, 'update']);
+        Route::put('restore-all', [TaskController::class, 'restoreAll']);
         Route::put('{id}/restore', [TaskController::class, 'restore']);
         Route::put('{id}/complete', [TaskController::class, 'complete']);
         Route::delete('{id}', [TaskController::class, 'delete']);

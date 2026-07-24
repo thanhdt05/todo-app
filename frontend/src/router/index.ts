@@ -2,11 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../components/Login.vue'
 import Register from '../components/Register.vue'
 import TasksList from '@/components/TasksList.vue'
+import TaskLayout from '@/components/TaskLayout.vue'
+import TrashedTasksList from '@/components/TrashedTasksList.vue'
+import Profile from '@/components/Profile.vue'
 
 const routes = [
   {
     path: '/',
-    redirect: '/tasks'
+    redirect: '/login'
   },
   {
     path: '/login',
@@ -20,8 +23,25 @@ const routes = [
   },
   {
     path: '/tasks',
-    name: 'TasksList',
-    component: TasksList
+    name: 'TaskLayout',
+    component: TaskLayout,
+    children: [
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: Profile
+      },
+      {
+        path: '',
+        name: 'TasksList',
+        component: TasksList
+      },
+      {
+        path: 'trash',
+        name: 'TrashedTasksList',
+        component: TrashedTasksList
+      }
+    ]
   }
 ]
 

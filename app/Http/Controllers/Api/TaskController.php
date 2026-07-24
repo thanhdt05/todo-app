@@ -32,6 +32,17 @@ class TaskController extends Controller
         ], 200);
     }
 
+    public function getAllTrashedTasks(Request $request)
+    {
+        $tasks = $this->taskService->getAllTrashed($request->user());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lấy danh sách thành công',
+            'data' => $tasks,
+        ], 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
