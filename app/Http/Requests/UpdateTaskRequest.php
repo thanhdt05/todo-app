@@ -23,9 +23,9 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string|max:255',
-            'due_date' => 'sometimes|date',
+            'title' => 'sometimes|max:255',
+            'description' => 'sometimes|max:255',
+            'due_date' => 'sometimes|nullable|date|after_or_equal:today',
             'status' => 'sometimes|in:todo,doing,done',
         ];
     }
@@ -36,6 +36,8 @@ class UpdateTaskRequest extends FormRequest
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự',
             'description.max' => 'Mô tả không được vượt quá 255 ký tự',
             'due_date.date' => 'Ngày hết hạn không hợp lệ',
+            'due_date.after_or_equal' => 'Ngày hết hạn phải lớn hơn hoặc bằng thời gian hiện tại',
+            'due_date.after' => 'Ngày hết hạn phải lớn hơn thời gian hiện tại',
             'status.in' => 'Trạng thái không hợp lệ',
         ];
     }

@@ -10,6 +10,67 @@
         <span>+ Add</span>
       </button>
     </div>
+
+    <!-- Alert Notification Banners -->
+    <div
+      v-if="errorMessage && !isModalOpen"
+      class="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-center justify-between shadow-xs"
+    >
+      <div class="flex items-center space-x-2.5">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-red-500 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <span class="font-medium">{{ errorMessage }}</span>
+      </div>
+      <button
+        type="button"
+        @click="errorMessage = ''"
+        class="text-red-400 hover:text-red-600 font-bold text-lg cursor-pointer ml-3"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div
+      v-if="successMessage && !isModalOpen"
+      class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl flex items-center justify-between shadow-xs"
+    >
+      <div class="flex items-center space-x-2.5">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-emerald-500 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+        <span class="font-medium">{{ successMessage }}</span>
+      </div>
+      <button
+        type="button"
+        @click="successMessage = ''"
+        class="text-emerald-400 hover:text-emerald-600 font-bold text-lg cursor-pointer ml-3"
+      >
+        &times;
+      </button>
+    </div>
     <!-- Filter Tabs -->
     <div
       class="flex items-center space-x-8 border-b border-slate-100 mb-6 text-xs sm:text-sm font-bold uppercase tracking-wider"
@@ -77,8 +138,11 @@
           <input
             type="checkbox"
             :checked="task.status === 'done'"
+            :disabled="task.status === 'done'"
+            @click.stop
             @change="handleToggleTask(task)"
-            class="w-5 h-5 accent-blue-600 rounded cursor-pointer shrink-0"
+            class="w-5 h-5 accent-blue-600 rounded shrink-0"
+            :class="task.status === 'done' ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'"
           />
           <span
             :class="
@@ -202,6 +266,37 @@
         <button
           @click="closeModal"
           class="text-slate-400 hover:text-slate-600 font-bold text-xl cursor-pointer"
+        >
+          &times;
+        </button>
+      </div>
+
+      <!-- Modal Error Alert -->
+      <div
+        v-if="errorMessage"
+        class="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl flex items-center justify-between"
+      >
+        <div class="flex items-center space-x-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-red-500 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span class="font-medium">{{ errorMessage }}</span>
+        </div>
+        <button
+          type="button"
+          @click="errorMessage = ''"
+          class="text-red-400 hover:text-red-600 font-bold text-lg cursor-pointer ml-2"
         >
           &times;
         </button>
@@ -367,6 +462,8 @@ const taskForm = ref({
 
 const isEditMode = ref(false);
 const openDetailModal = (task: Task) => {
+  errorMessage.value = '';
+  successMessage.value = '';
   isEditMode.value = false;
   selectedTaskId.value = task.id;
   taskForm.value = {
@@ -379,6 +476,8 @@ const openDetailModal = (task: Task) => {
 };
 
 const openCreateModal = () => {
+  errorMessage.value = '';
+  successMessage.value = '';
   isEditMode.value = true;
   selectedTaskId.value = null;
   taskForm.value = {
@@ -391,6 +490,8 @@ const openCreateModal = () => {
 };
 
 const openEditModal = (task: Task) => {
+  errorMessage.value = '';
+  successMessage.value = '';
   isEditMode.value = true;
   selectedTaskId.value = task.id;
   taskForm.value = {
@@ -403,7 +504,9 @@ const openEditModal = (task: Task) => {
 };
 
 const closeModal = () => {
-  ((isModalOpen.value = false), (selectedTaskId.value = null));
+  errorMessage.value = '';
+  isModalOpen.value = false;
+  selectedTaskId.value = null;
   taskForm.value = {
     title: '',
     description: '',
@@ -478,9 +581,11 @@ const goTo = (page: number) => {
 const handleApiError = (error: any, defaultMessage: string) => {
   if (error.response?.data) {
     if (error.response.data.errors) {
-      const firstErrorKey = Object.keys(error.response.data.errors)[0];
-      if (firstErrorKey) {
-        errorMessage.value = error.response.data.errors[firstErrorKey][0];
+      const errorList = Object.values(error.response.data.errors).flat() as string[];
+      if (errorList.length > 0) {
+        errorMessage.value = errorList.join('. ');
+      } else {
+        errorMessage.value = error.response.data.message || defaultMessage;
       }
     } else {
       errorMessage.value = error.response.data.message || defaultMessage;
@@ -491,8 +596,19 @@ const handleApiError = (error: any, defaultMessage: string) => {
 };
 
 let searchTimer: any = null;
+let successTimer: any = null;
+
+watch(successMessage, (newVal) => {
+  if (successTimer) clearTimeout(successTimer);
+  if (newVal) {
+    successTimer = setTimeout(() => {
+      successMessage.value = '';
+    }, 2000);
+  }
+});
 
 watch([keyword, currentTab], () => {
+  successMessage.value = '';
   if (searchTimer) clearTimeout(searchTimer);
 
   searchTimer = setTimeout(() => {
@@ -503,7 +619,6 @@ watch([keyword, currentTab], () => {
 const handleGetTasksList = async (page: number = 1) => {
   try {
     errorMessage.value = '';
-    successMessage.value = '';
 
     const token = localStorage.getItem('token');
 
@@ -533,7 +648,6 @@ const handleGetTasksList = async (page: number = 1) => {
       currentPage.value = response.data.data.current_page;
       lastPage.value = response.data.data.last_page;
       totalTasks.value = response.data.data.total;
-      successMessage.value = response.data.message || 'Lấy danh sách công việc thành công';
     }
   } catch (error: any) {
     handleApiError(error, 'Lấy danh sách công việc thất bại');
@@ -543,7 +657,6 @@ const handleGetTasksList = async (page: number = 1) => {
 const handleGetSingleTask = async (taskId: number) => {
   try {
     errorMessage.value = '';
-    successMessage.value = '';
 
     const token = localStorage.getItem('token');
 
@@ -568,6 +681,7 @@ const handleGetSingleTask = async (taskId: number) => {
 };
 
 const handleToggleTask = async (task: Task) => {
+  if (task.status === 'done') return;
   try {
     const token = localStorage.getItem('token');
 

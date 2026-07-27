@@ -55,11 +55,15 @@ class TaskService
 
     public function create(User $user, array $data): Task
     {
+        $status = $data['status'] ?? 'todo';
+
         $task = Task::create([
             'user_id' => $user->id,
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'due_date' => $data['due_date'] ?? null,
+            'status' => $status,
+            'completed_at' => $status === 'done' ? now() : null,
         ]);
 
         return $task;

@@ -1,5 +1,66 @@
 <template>
   <div>
+    <!-- Alert Notification Banners -->
+    <div
+      v-if="errorMessage"
+      class="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-center justify-between shadow-xs"
+    >
+      <div class="flex items-center space-x-2.5">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-red-500 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <span class="font-medium">{{ errorMessage }}</span>
+      </div>
+      <button
+        type="button"
+        @click="errorMessage = ''"
+        class="text-red-400 hover:text-red-600 font-bold text-lg cursor-pointer ml-3"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div
+      v-if="successMessage"
+      class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl flex items-center justify-between shadow-xs"
+    >
+      <div class="flex items-center space-x-2.5">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-emerald-500 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+        <span class="font-medium">{{ successMessage }}</span>
+      </div>
+      <button
+        type="button"
+        @click="successMessage = ''"
+        class="text-emerald-400 hover:text-emerald-600 font-bold text-lg cursor-pointer ml-3"
+      >
+        &times;
+      </button>
+    </div>
+
     <TaskSearch v-model="keyword" placeholder="Tìm kiếm công việc..." />
 
     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
@@ -287,8 +348,19 @@ const goTo = (page: number) => {
 };
 
 let searchTimer: any = null;
+let successTimer: any = null;
+
+watch(successMessage, (newVal) => {
+  if (successTimer) clearTimeout(successTimer);
+  if (newVal) {
+    successTimer = setTimeout(() => {
+      successMessage.value = '';
+    }, 2000);
+  }
+});
 
 watch(keyword, () => {
+  successMessage.value = '';
   if (searchTimer) clearTimeout(searchTimer);
 
   searchTimer = setTimeout(() => {
@@ -299,7 +371,6 @@ watch(keyword, () => {
 const handleGetTasksList = async (page: number = 1) => {
   try {
     errorMessage.value = '';
-    successMessage.value = '';
 
     const token = localStorage.getItem('token');
 
@@ -327,7 +398,6 @@ const handleGetTasksList = async (page: number = 1) => {
       totalTasks.value = response.data.data.total;
       lastPage.value = response.data.data.last_page;
       selectedTaskIds.value = [];
-      successMessage.value = response.data.message || 'Lấy danh sách công việc thành công';
     }
   } catch (error: any) {
     handleApiError(error, 'Lấy danh sách công việc thất bại');
