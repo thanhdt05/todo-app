@@ -1,56 +1,71 @@
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans">
     <div class="w-full max-w-3xl flex items-center justify-end mb-3">
-
-        <div class="flex items-center space-x-2 sm:space-x-3">
-            <RouterLink  
-            to="/tasks/profile"
-            class="flex items-center space-x-2 p-1.5 pr-3 rounded-xl bg-white hover:bg-slate-50 transition cursor-pointer text-slate-700 text-xs sm:text-sm font-semibold border border-slate-200 shadow-2xs"
-            title="Xem thông tin chi tiết"
-            >
-            <div class="w-7 h-7 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center text-xs font-bold">
-                U
-            </div>
-            <span class="hidden sm:inline">Xin chào, {{ user.name  || 'User'}}</span>
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <RouterLink
+          to="/tasks/profile"
+          class="flex items-center space-x-2 p-1.5 pr-3 rounded-xl bg-white hover:bg-slate-50 transition cursor-pointer text-slate-700 text-xs sm:text-sm font-semibold border border-slate-200 shadow-2xs"
+          title="Xem thông tin chi tiết"
+        >
+          <div
+            class="w-7 h-7 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center text-xs font-bold"
+          >
+            U
+          </div>
+          <span class="hidden sm:inline">Xin chào, {{ user.name || 'User' }}</span>
         </RouterLink>
 
-            <RouterLink 
-            to="/login"
-            class="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-xl transition cursor-pointer flex items-center space-x-1 border border-red-100 shadow-2xs"
-            title="Đăng xuất"
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span class="hidden sm:inline">Đăng xuất</span>
-            </RouterLink>
-
-        </div>
+        <RouterLink
+          to="/login"
+          class="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-xl transition cursor-pointer flex items-center space-x-1 border border-red-100 shadow-2xs"
+          title="Đăng xuất"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          <span class="hidden sm:inline">Đăng xuất</span>
+        </RouterLink>
+      </div>
     </div>
 
-
-    <div class="w-full max-w-3xl min-h-[60vh] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
-
-        <div class="p-6 sm:p-10">
-        
-        <div v-if="!route.path.includes('profile')" class="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
+    <div
+      class="w-full max-w-3xl min-h-[60vh] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100"
+    >
+      <div class="p-6 sm:p-10">
+        <div
+          v-if="!route.path.includes('profile')"
+          class="flex items-center justify-between mb-8 pb-4 border-b border-slate-100"
+        >
           <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-xl bg-cyan-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-cyan-200">
+            <div
+              class="w-9 h-9 rounded-xl bg-cyan-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-cyan-200"
+            >
               T
             </div>
             <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">TODO LIST</h1>
           </div>
-        
+
           <div class="flex space-x-2 bg-slate-100 p-1 rounded-xl text-sm font-semibold">
-            <router-link 
-              to="/tasks" 
+            <router-link
+              to="/tasks"
               exact-active-class="bg-white text-cyan-600 shadow-xs"
               class="px-4 py-1.5 rounded-lg text-slate-600 transition"
             >
               Danh sách
             </router-link>
-            <router-link 
-              to="/tasks/trash" 
+            <router-link
+              to="/tasks/trash"
               active-class="bg-white text-cyan-600 shadow-xs"
               class="px-4 py-1.5 rounded-lg text-slate-600 transition"
             >
@@ -60,60 +75,57 @@
         </div>
 
         <router-view />
-    </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
-import { ref, onMounted, provide } from 'vue'
-import { useRoute } from 'vue-router'
+import axios from 'axios';
+import { ref, onMounted, provide } from 'vue';
+import { useRoute } from 'vue-router';
 
-const route = useRoute()
+const route = useRoute();
 
 interface User {
-  id: number | null
-  name: string
-  email: string
-  created_at: string
+  id: number | null;
+  name: string;
+  email: string;
+  created_at: string;
 }
 
 const user = ref<User>({
   id: null,
   name: '',
   email: '',
-  created_at: ''
-})
+  created_at: '',
+});
 
-provide('user', user)
+provide('user', user);
 
 const fetchUser = async () => {
   try {
-    const token = localStorage.getItem('token')
-    if (!token) return
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
     const response = await axios.get('http://localhost:8000/api/me', {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    })
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
 
     if (response.data?.data) {
-      user.value = response.data.data
+      user.value = response.data.data;
     }
   } catch (error) {
-    console.error('Không thể lấy thông tin người dùng:', error)
+    console.error('Không thể lấy thông tin người dùng:', error);
   }
-}
+};
 
 onMounted(() => {
-  fetchUser()
-})
-
-
-
+  fetchUser();
+});
 </script>
 
 <style>

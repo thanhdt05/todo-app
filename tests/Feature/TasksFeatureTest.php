@@ -110,6 +110,7 @@ class TasksFeatureTest extends TestCase
                 'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue'],
             ]);
     }
+
     public function test_can_get_all_trashed_tasks()
     {
         $user = User::factory()->create();
@@ -230,5 +231,20 @@ class TasksFeatureTest extends TestCase
                 'message',
                 'data' => ['id', 'title', 'description', 'due_date', 'status', 'is_overdue'],
             ]);
+    }
+
+    public function test_task_without_due_date_is_not_overdue_when_completed()
+    {
+        $user = User::factory()->create();
+
+        $task = Task::factory()->create([
+            'user_id' => $user->id,
+            'due_date' => null,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/tasks/'.$task->id.'/complete');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.is_overdue', false);
     }
 }

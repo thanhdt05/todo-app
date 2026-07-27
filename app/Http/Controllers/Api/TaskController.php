@@ -35,7 +35,7 @@ class TaskController extends Controller
     public function getAllTrashedTasks(Request $request)
     {
         $tasks = $this->taskService->getAllTrashed($request->user(), [
-            'q' => $request->input('q')
+            'q' => $request->input('q'),
         ]);
 
         return response()->json([

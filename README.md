@@ -20,7 +20,7 @@ $$\text{Controller} \longrightarrow \text{Service Layer} \longrightarrow \text{M
 | :----- | :------------------- | :------------------------------- | :---------------- | :------------------------ |
 | `POST` | `/api/auth/register` | Đăng ký tài khoản mới            | `RegisterRequest` | `AuthController@register` |
 | `POST` | `/api/auth/login`    | Đăng nhập hệ thống               | `LoginRequest`    | `AuthController@login`    |
-| `POST` | `/api/auth/logout`   | Đăng xuất (Thu hồi Token)        | -                 | `AuthController@logout`   |
+| `POST` | `/api/logout`       | Đăng xuất (Thu hồi Token)        | -                 | `AuthController@logout`   |
 | `GET`  | `/api/me`            | Lấy thông tin tài khoản hiện tại | -                 | `AuthController@show`     |
 
 #### Luồng Đăng ký (`POST /api/auth/register`):
@@ -31,9 +31,9 @@ $$\text{Controller} \longrightarrow \text{Service Layer} \longrightarrow \text{M
 
 `POST /api/auth/login` $\rightarrow$ `LoginRequest` (validate) $\rightarrow$ `AuthController@login` $\rightarrow$ `AuthService@login(data)` $\rightarrow$ `User::where('email', ...)->first()` $\rightarrow$ `Hash::check(...)` $\rightarrow$ JSON 200
 
-#### Luồng Đăng xuất (`POST /api/auth/logout`):
+#### Luồng Đăng xuất (`POST /api/logout`):
 
-`POST /api/auth/logout` $\rightarrow$ `AuthController@logout` $\rightarrow$ `AuthService@logout(user)` $\rightarrow$ JSON 204
+`POST /api/logout` $\rightarrow$ `AuthController@logout` $\rightarrow$ `AuthService@logout(user)` $\rightarrow$ JSON 200
 
 #### Luồng Lấy thông tin cá nhân (`GET /api/me`):
 
@@ -131,35 +131,43 @@ cd todo-app
 cp .env.example .env
 ```
 
-### 3. Khởi chạy Docker Containers
+### 3. Build Docker Images
 
 ```bash
-docker compose up -d --build
+docker compose build
 ```
 
 ### 4. Cài đặt các gói phụ thuộc (Dependencies)
 
 ```bash
-docker compose exec todoapp composer install
+# Cài đặt dependencies PHP backend
+docker compose run --rm --no-deps todoapp composer install
+
+# Cài đặt dependencies Node frontend
+docker compose run --rm --no-deps frontend npm install
 ```
 
-### 5. Khởi tạo App Key & Database
+### 5. Khởi chạy Containers
+
+```bash
+docker compose up -d
+```
+
+### 6. Khởi tạo App Key & Database
 
 ```bash
 # Generate ứng dụng key
 docker compose exec todoapp php artisan key:generate
 
-# Chạy Migration tạo bảng
-docker compose exec todoapp php artisan migrate
-
-# Seed dữ liệu mẫu (nếu cần)
-docker compose exec todoapp php artisan db:seed
+# Chạy Migration tạo bảng kèm dữ liệu mẫu
+docker compose exec todoapp php artisan migrate:fresh --seed
 ```
 
-### 6. Chạy Test Suites
+### 7. Chạy Test Suites
 
 ```bash
 docker compose exec todoapp php artisan test
 ```
 
 Truy cập ứng dụng Web tại: **`http://localhost:5173`**
+Truy cập API backend tại: **`http://localhost:8000/api`**

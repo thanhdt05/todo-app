@@ -20,7 +20,7 @@ class TaskService
 
             $query->where(function ($query) use ($keyword) {
                 $query->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"])
-                      ->orWhereRaw('LOWER(description) LIKE ?', ["%{$keyword}%"]);
+                    ->orWhereRaw('LOWER(description) LIKE ?', ["%{$keyword}%"]);
             });
         }
 
@@ -36,13 +36,12 @@ class TaskService
 
             $query->where(function ($query) use ($keyword) {
                 $query->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"])
-                      ->orWhereRaw('LOWER(description) LIKE ?', ["%{$keyword}%"]);
+                    ->orWhereRaw('LOWER(description) LIKE ?', ["%{$keyword}%"]);
             });
         }
 
         return $query->paginate(5);
     }
-
 
     public function findById(User $user, string $id)
     {
@@ -91,7 +90,7 @@ class TaskService
         $task->update([
             'status' => 'done',
             'completed_at' => now(),
-            'is_overdue' => $task->due_date < now(),
+            'is_overdue' => $task->due_date !== null && $task->due_date->isPast(),
         ]);
 
         return $task;

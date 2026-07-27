@@ -26,6 +26,7 @@ class StoreTaskRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
             'due_date' => 'nullable|date',
+            'status' => 'nullable|in:pending,doing,done',
         ];
     }
 
@@ -38,6 +39,8 @@ class StoreTaskRequest extends FormRequest
             'description.max' => 'Mô tả không được vượt quá 255 ký tự',
             'due_date.required' => 'Ngày hết hạn không được để trống',
             'due_date.date' => 'Ngày hết hạn không hợp lệ',
+            'status.required' => 'Trạng thái không được để trống',
+            'status.in' => 'Trạng thái không hợp lệ',
         ];
     }
 

@@ -1,25 +1,25 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Login from '../components/Login.vue'
-import Register from '../components/Register.vue'
-import TasksList from '@/components/TasksList.vue'
-import TaskLayout from '@/components/TaskLayout.vue'
-import TrashedTasksList from '@/components/TrashedTasksList.vue'
-import Profile from '@/components/Profile.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import Login from '../components/Login.vue';
+import Register from '../components/Register.vue';
+import TasksList from '@/components/TasksList.vue';
+import TaskLayout from '@/components/TaskLayout.vue';
+import TrashedTasksList from '@/components/TrashedTasksList.vue';
+import Profile from '@/components/Profile.vue';
 
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/login',
   },
   {
     path: '/login',
     name: 'Login',
-    component: Login
+    component: Login,
   },
   {
     path: '/register',
     name: 'Register',
-    component: Register
+    component: Register,
   },
   {
     path: '/tasks',
@@ -29,25 +29,25 @@ const routes = [
       {
         path: 'profile',
         name: 'Profile',
-        component: Profile
+        component: Profile,
       },
       {
         path: '',
         name: 'TasksList',
-        component: TasksList
+        component: TasksList,
       },
       {
         path: 'trash',
         name: 'TrashedTasksList',
-        component: TrashedTasksList
-      }
-    ]
-  }
-]
+        component: TrashedTasksList,
+      },
+    ],
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

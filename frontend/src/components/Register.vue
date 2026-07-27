@@ -1,67 +1,98 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md p-8 shadow-xl rounded-2xl text-center bg-white/90 backdrop-blur-sm border border-cyan-100">
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-cyan-100 text-cyan-600 mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    <div
+      class="w-full max-w-md p-8 shadow-xl rounded-2xl text-center bg-white/90 backdrop-blur-sm border border-cyan-100"
+    >
+      <div
+        class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-cyan-100 text-cyan-600 mb-3"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+          />
         </svg>
       </div>
       <h1 class="text-3xl font-bold text-cyan-600">Sign up</h1>
       <p class="text-sm font-medium text-gray-500 mt-1">Sign up to your account!</p>
 
       <div v-if="errorMessage || successMessage">
-        <div v-if="errorMessage" class="text-red-600 bg-red-100 px-4 py-2 rounded-lg mb-2 border border-red-200">
+        <div
+          v-if="errorMessage"
+          class="text-red-600 bg-red-100 px-4 py-2 rounded-lg mb-2 border border-red-200"
+        >
           <p>{{ errorMessage }}</p>
         </div>
-        <div v-if="successMessage" class="text-green-600 bg-green-100 px-4 py-2 rounded-lg mb-2 border border-green-200">
+        <div
+          v-if="successMessage"
+          class="text-green-600 bg-green-100 px-4 py-2 rounded-lg mb-2 border border-green-200"
+        >
           <p>{{ successMessage }}</p>
         </div>
       </div>
 
       <form @submit.prevent="handleRegister" class="mt-6 space-y-4 text-left">
         <div>
-          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Name</label>
-          <input 
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1"
+            >Name</label
+          >
+          <input
             v-model="formData.name"
-            type="text" 
-            placeholder="Nguyen Van A" 
-            class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition" 
+            type="text"
+            placeholder="Nguyen Van A"
+            class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition"
           />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Email</label>
-          <input 
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1"
+            >Email</label
+          >
+          <input
             v-model="formData.email"
-            type="email" 
-            placeholder="email@example.com" 
-            class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition" 
+            type="email"
+            placeholder="email@example.com"
+            class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition"
           />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Password</label>
-          <input 
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1"
+            >Password</label
+          >
+          <input
             v-model="formData.password"
-            type="password" 
-            placeholder="••••••••" 
-            class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition" 
+            type="password"
+            placeholder="••••••••"
+            class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition"
           />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Confirm Password</label>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1"
+            >Confirm Password</label
+          >
           <input
             v-model="formData.password_confirmation"
-            type="password" 
-            placeholder="••••••••" 
-            class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition" 
+            type="password"
+            placeholder="••••••••"
+            class="w-full px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition"
           />
         </div>
 
         <div class="flex items-center justify-center pt-1">
-          <RouterLink to="/login" class="text-sm text-cyan-600 hover:underline font-medium">Already have an account? Login</RouterLink>
+          <RouterLink to="/login" class="text-sm text-cyan-600 hover:underline font-medium"
+            >Already have an account? Login</RouterLink
+          >
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           class="w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 transition cursor-pointer"
         >
           Sign up
@@ -89,36 +120,35 @@ const formData = ref({
 
 const handleRegister = async () => {
   try {
-    errorMessage.value = ''
-    successMessage.value = ''
+    errorMessage.value = '';
+    successMessage.value = '';
 
     const response = await axios.post('http://localhost:8000/api/auth/register', formData.value);
 
     if (response.data.data) {
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user))
+      localStorage.setItem('token', response.data.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.data.user));
     }
-    
+
     successMessage.value = response.data.message;
     router.push('/login');
   } catch (error: any) {
     if (error.response?.data) {
-        if (error.response.data.errors) {
-            const firstErrorKey = Object.keys(error.response.data.errors)[0]
-            if (firstErrorKey) {
-                errorMessage.value = error.response.data.errors[firstErrorKey][0]
-            } else {
-                errorMessage.value = error.response.data.message || 'Đăng ký thất bại'
-            }
+      if (error.response.data.errors) {
+        const firstErrorKey = Object.keys(error.response.data.errors)[0];
+        if (firstErrorKey) {
+          errorMessage.value = error.response.data.errors[firstErrorKey][0];
         } else {
-            errorMessage.value = error.response.data.message || 'Đăng ký thất bại'
+          errorMessage.value = error.response.data.message || 'Đăng ký thất bại';
         }
+      } else {
+        errorMessage.value = error.response.data.message || 'Đăng ký thất bại';
+      }
     } else {
-        errorMessage.value = error.message || 'Không thể kết nối đến máy chủ API'
+      errorMessage.value = error.message || 'Không thể kết nối đến máy chủ API';
     }
   }
-}
-
+};
 </script>
 
 <style>

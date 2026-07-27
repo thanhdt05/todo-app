@@ -31,7 +31,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Hoang Anh E\",\n    \"email\": \"user5@example.com\",\n    \"password\": \"12345678\"\n}",
+					"raw": "{\n    \"name\": \"User A\",\n    \"email\": \"usera@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -248,7 +248,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "\n  {\n    \"title\": \"Docker PostgreSQL\",\n    \"description\": \"Cấu hình Docker Compose cho Laravel\",\n    \"status\": \"done\",\n    \"due_date\": \"2026-07-20 10:30:00\"\n  }",
+					"raw": "{\n    \"title\": \"Docker PostgreSQL\",\n    \"description\": \"Cấu hình Docker Compose cho Laravel\",\n    \"due_date\": \"2026-08-01 10:30:00\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
