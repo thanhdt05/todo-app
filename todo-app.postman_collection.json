@@ -610,6 +610,38 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Get All Trashed",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/tasks/trashed/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"tasks",
+						"trashed",
+						""
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
