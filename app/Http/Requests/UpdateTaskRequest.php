@@ -23,10 +23,10 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'sometimes|max:255',
-            'description' => 'sometimes|max:255',
-            'due_date' => 'sometimes|nullable|date|after_or_equal:today',
-            'status' => 'sometimes|in:todo,doing,done',
+            'title' => ['sometimes', 'max:255'],
+            'description' => ['sometimes', 'max:255'],
+            'due_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:today'],
+            'status' => ['sometimes', 'in:todo,doing,done'],
         ];
     }
 

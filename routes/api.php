@@ -4,11 +4,14 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
+
+// Auth routes
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
 });
 
+// Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'show']);
@@ -19,7 +22,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('{id}', [TaskController::class, 'show']);
         Route::post('/', [TaskController::class, 'store']);
         Route::put('{id}', [TaskController::class, 'update']);
-        Route::put('restore-all', [TaskController::class, 'restoreAll']);
         Route::put('{id}/restore', [TaskController::class, 'restore']);
         Route::put('{id}/complete', [TaskController::class, 'complete']);
         Route::delete('{id}', [TaskController::class, 'delete']);

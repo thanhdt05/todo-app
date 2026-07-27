@@ -20,6 +20,7 @@ class TaskController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Task::class);
         $tasks = $this->taskService->getAll($request->user(), [
             'q' => $request->input('q'),
             'status' => $request->input('status'),
@@ -34,6 +35,7 @@ class TaskController extends Controller
 
     public function getAllTrashedTasks(Request $request)
     {
+        $this->authorize('viewAny', Task::class);
         $tasks = $this->taskService->getAllTrashed($request->user(), [
             'q' => $request->input('q'),
         ]);
@@ -107,7 +109,7 @@ class TaskController extends Controller
         ], 200);
     }
 
-    public function complete(UpdateTaskRequest $request, string $id)
+    public function complete(Request $request, string $id)
     {
         $task = $this->taskService->findById($request->user(), $id);
         $this->authorize('update', $task);
@@ -141,7 +143,7 @@ class TaskController extends Controller
     public function destroy(Request $request, string $id)
     {
         $task = $this->taskService->findDeletedById($request->user(), $id);
-        $this->authorize('delete', $task);
+        $this->authorize('forceDelete', $task);
 
         $this->taskService->forceDelete($request->user(), $id);
 

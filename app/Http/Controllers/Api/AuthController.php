@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
+use App\Traits\HttpResponse;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+    use HttpResponse;
     public function __construct(
         private AuthService $authService
     ) {}
@@ -18,47 +20,31 @@ class AuthController extends Controller
     {
         $data = $this->authService->register($request->validated());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Đăng ký thành công',
-            'data' => [
-                'user' => $data['user'],
-                'token' => $data['token'],
-            ],
-        ], 201);
+        return $this->success([
+            'user' => $data['user'],
+            'token' => $data['token'],
+        ], 'Đăng ký thành công', 201);
     }
 
     public function login(LoginRequest $request)
     {
         $data = $this->authService->login($request->validated());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Đăng nhập thành công',
-            'data' => [
-                'user' => $data['user'],
-                'token' => $data['token'],
-            ],
-        ], 200);
+        return $this->success([
+            'user' => $data['user'],
+            'token' => $data['token'],
+        ], 'Đăng nhập thành công'); 
     }
 
     public function logout(Request $request)
     {
         $this->authService->logout($request->user());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Đăng xuất thành công',
-            'data' => null,
-        ], 200);
+        return $this->success([], 'Đăng xuất thành công');
     }
 
     public function show(Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Lấy thông tin người dùng thành công',
-            'data' => $request->user(),
-        ], 200);
+        return $this->success($request->user(), 'Lấy thông tin người dùng thành công');
     }
 }
