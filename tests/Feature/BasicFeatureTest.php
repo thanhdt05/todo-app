@@ -15,7 +15,7 @@ class BasicFeatureTest extends TestCase
     {
         $this->assertGuest();
 
-        $response = $this->post('/api/auth/register', [
+        $response = $this->postJson('/api/auth/register', [
             'name' => 'Test User',
             'email' => 'testregister@example.com',
             'password' => '12345678',
@@ -39,7 +39,7 @@ class BasicFeatureTest extends TestCase
             'password' => Hash::make('12345678'),
         ]);
 
-        $response = $this->post('/api/auth/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => $user->email,
             'password' => '12345678',
         ]);
@@ -54,7 +54,7 @@ class BasicFeatureTest extends TestCase
             'password' => Hash::make('12345678'),
         ]);
 
-        $response = $this->post('/api/auth/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => $user->email,
             'password' => 'invalid-password',
         ]);

@@ -4,7 +4,7 @@ services:
     image: thanhdt05/todoapp:1.0.1
     build: .
     ports:
-      - "8000:8000"
+      - '8000:8000'
     volumes:
       - .:/var/www/html
     env_file:
@@ -21,7 +21,7 @@ services:
         NODE_ENV: development
     working_dir: /var/www/html/frontend
     ports:
-      - "5173:5173"
+      - '5173:5173'
     volumes:
       - .:/var/www/html
       - frontend_node_modules:/var/www/html/frontend/node_modules
@@ -37,7 +37,7 @@ services:
       POSTGRES_USER: todo
       POSTGRES_PASSWORD: secret
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
 
