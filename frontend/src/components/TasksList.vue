@@ -629,7 +629,7 @@ const handleGetTasksList = async (page: number = 1) => {
 
     const params: any = { page };
     if (keyword.value) {
-      params.q = keyword.value;
+      params.keyword = keyword.value;
     }
     if (currentTab.value !== 'ALL') {
       params.status = currentTab.value.toLowerCase();
@@ -763,12 +763,16 @@ const handleEditTask = async (taskId: number) => {
       return;
     }
 
-    const response = await axios.put(`http://localhost:8000/api/tasks/${taskId}`, taskForm.value, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const response = await axios.patch(
+      `http://localhost:8000/api/tasks/${taskId}`,
+      taskForm.value,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      }
+    );
 
     if (response.data) {
       successMessage.value = response.data.message;

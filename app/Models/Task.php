@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,6 @@ class Task extends Model
         'status',
         'due_date',
         'completed_at',
-        'is_overdue',
     ];
 
     protected function casts(): array
@@ -27,12 +27,19 @@ class Task extends Model
         return [
             'due_date' => 'datetime',
             'completed_at' => 'datetime',
-            'is_overdue' => 'boolean',
+            'status' => TaskStatus::class,
         ];
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->status !== TaskStatus::DONE &&
+            $this->due_date !== null &&
+            $this->due_date->isPast();
     }
 }

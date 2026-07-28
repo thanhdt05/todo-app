@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -45,11 +47,17 @@ class User extends Authenticatable
             'password' => 'hashed',
             'microsoft_token' => 'encrypted',
             'microsoft_refresh_token' => 'encrypted',
+            'role' => UserRole::class,
         ];
     }
 
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::ADMIN;
     }
 }

@@ -381,7 +381,7 @@ const handleGetTasksList = async (page: number = 1) => {
 
     const params: any = { page };
     if (keyword.value) {
-      params.q = keyword.value;
+      params.keyword = keyword.value;
     }
 
     const response = await axios.get('http://localhost:8000/api/tasks/trashed', {

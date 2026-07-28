@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\TaskStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTaskRequest extends FormRequest
 {
@@ -24,9 +26,9 @@ class UpdateTaskRequest extends FormRequest
     {
         return [
             'title' => ['sometimes', 'max:255'],
-            'description' => ['sometimes', 'max:255'],
+            'description' => ['sometimes', 'nullable', 'max:255'],
             'due_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:today'],
-            'status' => ['sometimes', 'in:todo,doing,done'],
+            'status' => ['sometimes', Rule::enum(TaskStatus::class)],
         ];
     }
 
@@ -37,8 +39,7 @@ class UpdateTaskRequest extends FormRequest
             'description.max' => 'Mô tả không được vượt quá 255 ký tự',
             'due_date.date' => 'Ngày hết hạn không hợp lệ',
             'due_date.after_or_equal' => 'Ngày hết hạn phải lớn hơn hoặc bằng thời gian hiện tại',
-            'due_date.after' => 'Ngày hết hạn phải lớn hơn thời gian hiện tại',
-            'status.in' => 'Trạng thái không hợp lệ',
+            'status.enum' => 'Trạng thái không hợp lệ',
         ];
     }
 

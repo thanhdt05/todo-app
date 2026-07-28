@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#0e7490" flood-opacity="0.4" />
+    </filter>
+  </defs>
+  
+  <!-- Outer Rounded Container -->
+  <rect x="32" y="32" width="448" height="448" rx="120" fill="url(#bgGrad)" filter="url(#shadow)" />
+  <rect x="36" y="36" width="440" height="440" rx="116" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="8" />
+
+  <!-- Todo List Lines -->
+  <rect x="128" y="152" width="256" height="32" rx="16" fill="#ffffff" fill-opacity="0.4" />
+  <rect x="128" y="224" width="180" height="32" rx="16" fill="#ffffff" fill-opacity="0.4" />
+  <rect x="128" y="296" width="120" height="32" rx="16" fill="#ffffff" fill-opacity="0.4" />
+
+  <!-- Checkmark Emblem -->
+  <circle cx="360" cy="340" r="76" fill="#10b981" />
+  <path d="M320 340l28 28 52-52" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>

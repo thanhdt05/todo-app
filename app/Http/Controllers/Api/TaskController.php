@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TasksResource;
@@ -20,11 +21,11 @@ class TaskController extends Controller
         protected TaskService $taskService
     ) {}
 
-    public function index(Request $request)
+    public function index(IndexTaskRequest $request)
     {
         $this->authorize('viewAny', Task::class);
         $tasks = $this->taskService->getAll($request->user(), [
-            'q' => $request->input('q'),
+            'keyword' => $request->input('keyword'),
             'status' => $request->input('status'),
         ]);
 
@@ -34,11 +35,11 @@ class TaskController extends Controller
         );
     }
 
-    public function getAllTrashedTasks(Request $request)
+    public function getAllTrashedTasks(IndexTaskRequest $request)
     {
         $this->authorize('viewAny', Task::class);
         $tasks = $this->taskService->getAllTrashed($request->user(), [
-            'q' => $request->input('q'),
+            'keyword' => $request->input('keyword'),
         ]);
 
         return $this->paginated(
@@ -109,7 +110,7 @@ class TaskController extends Controller
     public function complete(Request $request, string $id)
     {
         $task = $this->taskService->findById($request->user(), $id);
-        $this->authorize('update', $task);
+        $this->authorize('complete', $task);
 
         $completedTask = $this->taskService->complete($request->user(), $id);
 

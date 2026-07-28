@@ -15,8 +15,8 @@ class TaskPolicy
     {
         return true;
     }
-    
-    /** 
+
+    /**
      * Determine whether the user can view any trashed models.
      */
     public function viewTrash(User $user): bool
@@ -29,7 +29,7 @@ class TaskPolicy
      */
     public function view(User $user, Task $task): Response
     {
-        return $user->id === $task->user_id
+        return ($user->isAdmin() || $user->id === $task->user_id)
             ? Response::allow()
             : Response::deny('Bạn không có quyền xem công việc này');
     }
@@ -47,7 +47,7 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): Response
     {
-        return $user->id === $task->user_id
+        return ($user->isAdmin() || $user->id === $task->user_id)
             ? Response::allow()
             : Response::deny('Bạn không có quyền cập nhật công việc này');
     }
@@ -57,7 +57,7 @@ class TaskPolicy
      */
     public function complete(User $user, Task $task): Response
     {
-        return $user->id === $task->user_id
+        return ($user->isAdmin() || $user->id === $task->user_id)
             ? Response::allow()
             : Response::deny('Bạn không có quyền hoàn thành công việc này');
     }
@@ -67,7 +67,7 @@ class TaskPolicy
      */
     public function delete(User $user, Task $task): Response
     {
-        return $user->id === $task->user_id
+        return ($user->isAdmin() || $user->id === $task->user_id)
             ? Response::allow()
             : Response::deny('Bạn không có quyền xóa công việc này');
     }
@@ -77,12 +77,12 @@ class TaskPolicy
      */
     public function restore(User $user, Task $task): Response
     {
-        return $user->id === $task->user_id
+        return ($user->isAdmin() || $user->id === $task->user_id)
             ? Response::allow()
             : Response::deny('Bạn không có quyền khôi phục công việc này');
     }
 
-    /** 
+    /**
      * Determine whether the user can restore any models.
      */
     public function restoreAny(User $user): bool
@@ -95,7 +95,7 @@ class TaskPolicy
      */
     public function forceDelete(User $user, Task $task): Response
     {
-        return $user->id === $task->user_id
+        return ($user->isAdmin() || $user->id === $task->user_id)
             ? Response::allow()
             : Response::deny('Bạn không có quyền xóa vĩnh viễn công việc này');
     }

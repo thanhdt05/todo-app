@@ -2,115 +2,163 @@
 
 namespace App\Services;
 
+use App\Enums\TaskStatus;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class TaskService
 {
-    public function getAll(User $user, array $filters)
+    /**
+     * @param  array{keyword?: string, status?: string, per_page?: int}  $filters
+     */
+    public function getAll(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = $user->tasks()->with('user')->latest();
+        $query = Task::query()->with('user')->latest();
+
+        $this->applyUserScope($query, $user);
+        $this->keywordFilter($query, $filters['keyword'] ?? null);
 
         if (! empty($filters['status'])) {
-            $query = $query->where('status', $filters['status']);
+            $query->where('status', $filters['status']);
         }
 
-        if (! empty($filters['q'])) {
-            $keyword = mb_strtolower($filters['q']);
-
-            $query->where(function ($query) use ($keyword) {
-                $query->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"])
-                    ->orWhereRaw('LOWER(description) LIKE ?', ["%{$keyword}%"]);
-            });
-        }
-
-        return $query->paginate(5);
+        return $query->paginate(
+            $this->getPerPage($filters)
+        );
     }
 
-    public function getAllTrashed(User $user, array $filters)
+    /**
+     * @param  array{keyword?: string, per_page?: int}  $filters
+     */
+    public function getAllTrashed(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = $user->tasks()->with('user')->onlyTrashed()->latest();
+        $query = Task::query()
+            ->with('user')
+            ->onlyTrashed()
+            ->latest();
 
-        if (! empty($filters['q'])) {
-            $keyword = mb_strtolower($filters['q']);
+        $this->applyUserScope($query, $user);
+        $this->keywordFilter($query, $filters['keyword'] ?? null);
 
-            $query->where(function ($query) use ($keyword) {
-                $query->whereRaw('LOWER(title) LIKE ?', ["%{$keyword}%"])
-                    ->orWhereRaw('LOWER(description) LIKE ?', ["%{$keyword}%"]);
-            });
-        }
-
-        return $query->paginate(5);
+        return $query->paginate(
+            $this->getPerPage($filters)
+        );
     }
 
-    public function findById(User $user, string $id)
+    public function findById(User $user, string $id): Task
     {
-        return Task::with('user')->findOrFail($id);
+        $query = Task::query()->with('user');
+
+        $this->applyUserScope($query, $user);
+
+        return $query->findOrFail($id);
     }
 
-    public function findDeletedById(User $user, string $id)
+    public function findDeletedById(User $user, string $id): Task
     {
-        return Task::with('user')->onlyTrashed()->findOrFail($id);
+        $query = Task::query()
+            ->with('user')
+            ->onlyTrashed();
+
+        $this->applyUserScope($query, $user);
+
+        return $query->findOrFail($id);
     }
 
     public function create(User $user, array $data): Task
     {
-        $status = $data['status'] ?? 'todo';
+        $status = isset($data['status'])
+            ? TaskStatus::from($data['status'])
+            : TaskStatus::TODO;
 
-        $task = Task::create([
-            'user_id' => $user->id,
+        return $user->tasks()->create([
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'due_date' => $data['due_date'] ?? null,
             'status' => $status,
-            'completed_at' => $status === 'done' ? now() : null,
-        ]);
-
-        return $task;
+            'completed_at' => $status === TaskStatus::DONE
+                ? now()
+                : null,
+        ])->load('user');
     }
 
-    public function update(User $user, string $id, array $data)
+    public function update(User $user, string $id, array $data): Task
     {
         $task = $this->findById($user, $id);
 
+        if (array_key_exists('status', $data)) {
+            $newStatus = TaskStatus::from($data['status']);
+
+            $data['status'] = $newStatus;
+            $data['completed_at'] = $newStatus === TaskStatus::DONE
+                ? ($task->completed_at ?? now())
+                : null;
+        }
+
         $task->update($data);
 
-        return $task;
+        return $task->refresh()->load('user');
     }
 
-    public function restore(User $user, string $id)
+    public function complete(User $user, string $id): Task
+    {
+        $task = $this->findById($user, $id);
+
+        $task->update([
+            'status' => TaskStatus::DONE,
+            'completed_at' => $task->completed_at ?? now(),
+        ]);
+
+        return $task->refresh()->load('user');
+    }
+
+    public function restore(User $user, string $id): Task
     {
         $task = $this->findDeletedById($user, $id);
 
         $task->restore();
 
-        return $task;
+        return $task->refresh()->load('user');
     }
 
-    public function complete(User $user, string $id)
+    public function delete(User $user, string $id): void
     {
-        $task = $this->findById($user, $id);
-
-        $task->update([
-            'status' => 'done',
-            'completed_at' => now(),
-            'is_overdue' => $task->due_date !== null && $task->due_date->isPast(),
-        ]);
-
-        return $task;
+        $this->findById($user, $id)->delete();
     }
 
-    public function delete(User $user, string $id)
+    public function forceDelete(User $user, string $id): void
     {
-        $task = $this->findById($user, $id);
-
-        $task->delete();
+        $this->findDeletedById($user, $id)->forceDelete();
     }
 
-    public function forceDelete(User $user, string $id)
+    private function applyUserScope(Builder $query, User $user): void
     {
-        $task = $this->findDeletedById($user, $id);
+        if (! $user->isAdmin()) {
+            $query->where('user_id', $user->id);
+        }
+    }
 
-        $task->forceDelete();
+    private function keywordFilter(Builder $query, ?string $keyword): void
+    {
+        if (blank($keyword)) {
+            return;
+        }
+
+        $keyword = mb_strtolower(trim($keyword));
+
+        $query->where(function (Builder $query) use ($keyword) {
+            $query->where('title', 'ILIKE', "%{$keyword}%")
+                ->orWhere('description', 'ILIKE', "%{$keyword}%");
+        });
+    }
+
+    private function getPerPage(array $filters): int
+    {
+        return min(
+            max((int) ($filters['per_page'] ?? 5), 1),
+            100
+        );
     }
 }

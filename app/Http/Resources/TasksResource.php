@@ -21,7 +21,7 @@ class TasksResource extends JsonResource
             'status' => $this->status,
             'due_date' => $this->due_date?->toISOString(),
             'completed_at' => $this->completed_at?->toISOString(),
-            'is_overdue' => $this->is_overdue,
+            'is_overdue' => $this->isOverdue(),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'user' => UserResource::make($this->whenLoaded('user')),
