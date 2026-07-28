@@ -144,21 +144,31 @@
     <div class="login-wrapper">
         <div class="login-container">
 
-            <!-- Microsoft 365 Red Pill Button -->
+            <!-- Error / Notification Alerts -->
+            @if (session('error'))
+                <div class="alert alert-danger mb-4 rounded-3 shadow-sm">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->has('microsoft'))
+                <div class="alert alert-danger mb-4 rounded-3 shadow-sm">
+                    {{ $errors->first('microsoft') }}
+                </div>
+            @endif
+
             <div class="text-center mb-4 pb-2">
-                <a href="{{ route('ms-login') }}" class="btn btn-ms365 shadow-sm">
-                    Microsoft365アカウントでログイン
+                <a href="{{ route('redirect', ['provider' => 'microsoft']) }}" class="btn btn-ms365 shadow-sm">
+                    Login with Microsoft 365
                 </a>
             </div>
 
-            <!-- Main Login Form -->
             <form action="#" method="POST">
                 @csrf
 
-                <!-- User ID Row -->
                 <div class="form-row-custom">
                     <label for="username" class="form-label-custom">
-                        ユーザID(メールアドレス)
+                        Username(Email)
                     </label>
                     <input 
                         type="email" 
@@ -177,10 +187,9 @@
                     </div>
                 @enderror
 
-                <!-- Password Row -->
                 <div class="form-row-custom">
                     <label for="password" class="form-label-custom">
-                        パスワード
+                        Password
                     </label>
                     <input 
                         type="password" 
@@ -198,23 +207,21 @@
                     </div>
                 @enderror
 
-                <!-- Show Password Checkbox -->
                 <div class="form-offset-custom mt-2">
                     <div class="form-offset-space"></div>
                     <div class="form-offset-content">
                         <label for="toggle-password" class="show-pass-label">
                             <input type="checkbox" id="toggle-password" class="form-check-input show-pass-checkbox mt-0">
-                            <span>パスワードを表示する</span>
+                            <span>Remember me</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- Submit Button (Left-aligned with checkbox & input column) -->
                 <div class="form-offset-custom mt-4 pt-2">
                     <div class="form-offset-space"></div>
                     <div class="form-offset-content">
                         <button type="submit" class="btn btn-login shadow-sm">
-                            ログイン
+                            Login
                         </button>
                     </div>
                 </div>
@@ -224,7 +231,6 @@
         </div>
     </div>
 
-    <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const togglePassword = document.getElementById('toggle-password');

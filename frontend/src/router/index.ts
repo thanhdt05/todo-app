@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Login from '../components/Login.vue';
-import Register from '../components/Register.vue';
+import Login from '@/components/Login.vue';
+import Register from '@/components/Register.vue';
 import TasksList from '@/components/TasksList.vue';
 import TaskLayout from '@/components/TaskLayout.vue';
 import TrashedTasksList from '@/components/TrashedTasksList.vue';
 import Profile from '@/components/Profile.vue';
+import AuthCallback from '@/components/AuthCallback.vue';
 
 const routes = [
   {
@@ -20,6 +21,11 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Register,
+  },
+  {
+    path: '/auth/callback',
+    name: 'AuthCallback',
+    component: AuthCallback,
   },
   {
     path: '/tasks',

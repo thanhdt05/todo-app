@@ -77,4 +77,11 @@ class BasicFeatureTest extends TestCase
                 'data' => ['id', 'name', 'email'],
             ]);
     }
+
+    public function test_login_route_exists()
+    {
+        $response = $this->get(route('login'));
+
+        $response->assertStatus(200);
+    }
 }
