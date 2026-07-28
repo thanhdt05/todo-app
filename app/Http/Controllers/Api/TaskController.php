@@ -5,14 +5,16 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Resources\TasksResource;
 use App\Models\Task;
 use App\Services\TaskService;
+use App\Traits\HttpResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, HttpResponse;
 
     public function __construct(
         protected TaskService $taskService
@@ -26,11 +28,10 @@ class TaskController extends Controller
             'status' => $request->input('status'),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Lấy danh sách thành công',
-            'data' => $tasks,
-        ], 200);
+        return $this->paginated(
+            TasksResource::collection($tasks),
+            'Lấy danh sách thành công'
+        );
     }
 
     public function getAllTrashedTasks(Request $request)
@@ -40,11 +41,10 @@ class TaskController extends Controller
             'q' => $request->input('q'),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Lấy danh sách thành công',
-            'data' => $tasks,
-        ], 200);
+        return $this->paginated(
+            TasksResource::collection($tasks),
+            'Lấy danh sách đã xóa thành công'
+        );
     }
 
     /**
@@ -56,11 +56,11 @@ class TaskController extends Controller
 
         $task = $this->taskService->create($request->user(), $request->validated());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Lưu thành công',
-            'data' => $task,
-        ], 201);
+        return $this->success(
+            TasksResource::make($task),
+            'Thêm mới thành công',
+            201
+        );
     }
 
     /**
@@ -71,11 +71,10 @@ class TaskController extends Controller
         $task = $this->taskService->findById($request->user(), $id);
         $this->authorize('view', $task);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Lấy thông tin thành công',
-            'data' => $task,
-        ], 200);
+        return $this->success(
+            TasksResource::make($task),
+            'Lấy thông tin thành công'
+        );
     }
 
     /**
@@ -88,11 +87,10 @@ class TaskController extends Controller
 
         $updatedTask = $this->taskService->update($request->user(), $id, $request->validated());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cập nhật thành công',
-            'data' => $updatedTask,
-        ], 200);
+        return $this->success(
+            TasksResource::make($updatedTask),
+            'Cập nhật thành công'
+        );
     }
 
     public function restore(Request $request, string $id)
@@ -102,11 +100,10 @@ class TaskController extends Controller
 
         $restoredTask = $this->taskService->restore($request->user(), $id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Khôi phục thành công',
-            'data' => $restoredTask,
-        ], 200);
+        return $this->success(
+            TasksResource::make($restoredTask),
+            'Khôi phục thành công'
+        );
     }
 
     public function complete(Request $request, string $id)
@@ -116,11 +113,10 @@ class TaskController extends Controller
 
         $completedTask = $this->taskService->complete($request->user(), $id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cập nhật trạng thái thành công',
-            'data' => $completedTask,
-        ], 200);
+        return $this->success(
+            TasksResource::make($completedTask),
+            'Cập nhật trạng thái thành công'
+        );
     }
 
     public function delete(Request $request, string $id)
@@ -130,11 +126,10 @@ class TaskController extends Controller
 
         $this->taskService->delete($request->user(), $id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Xóa thành công',
-            'data' => null,
-        ], 200);
+        return $this->success(
+            data : null,
+            message: 'Xóa thành công'
+        );
     }
 
     /**
@@ -147,10 +142,9 @@ class TaskController extends Controller
 
         $this->taskService->forceDelete($request->user(), $id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Xóa thành công',
-            'data' => null,
-        ], 200);
+        return $this->success(
+            data: null,
+            message: 'Xóa thành công'
+        );
     }
 }

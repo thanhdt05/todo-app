@@ -2,33 +2,48 @@
 
 namespace App\Traits;
 
-trait HttpResponse {
-    protected function success ($data = [], $message = null, $code = 200) {
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+trait HttpResponse
+{
+    protected function success(
+        mixed $data = [],
+        ?string $message = null,
+        int $code = 200,
+        array $meta = []
+    ) {
         return response()->json([
             'success' => true,
             'message' => $message,
             'data' => $data,
+            'meta' => $meta,
         ], $code);
     }
 
-    protected function error($data = [], $message = null, $code) {
+    protected function error(
+        ?string $message = null,
+        int $code = 400,
+        mixed $errors = null
+    ) {
         return response()->json([
             'success' => false,
             'message' => $message,
-            'data' => $data,
-        ], $code);  
+            'errors' => $errors,
+        ], $code);
     }
 
-    // Optional
-    protected function notFound($message = 'Not Found') {
-        return $this->error([], $message, 404);
-    }
+    protected function paginated(
+        ResourceCollection $collection,
+        ?string $message = null
+    ) {
+        $response = $collection->toResponse(request())->getData(true);
 
-    protected function forbidden($message = 'Forbidden') {
-        return $this->error([], $message, 403);
-    }
-
-    protected function unauthorized($message = 'Unauthorized') {
-        return $this->error([], $message, 401);
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $response['data'],
+            'meta' => $response['meta'] ?? [],
+            'links' => $response['links'] ?? [],
+        ], 200);
     }
 }

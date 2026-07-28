@@ -21,45 +21,53 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (AuthenticationException $e, Request $request) {
-            if (! $request->expectsJson()) {
-                return null;
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn chưa đăng nhập.',
+                    'data' => null,
+                ], 401);
             }
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Bạn chưa đăng nhập.',
-                'data' => null,
-            ], 401);
         });
 
         $exceptions->render(function (AuthorizationException $e, Request $request) {
-            if (! $request->expectsJson()) {
-                return null;
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'Bạn không có quyền thực hiện hành động này',
+                    'data' => null,
+                ], 403);
             }
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null,
-            ], 403);
         });
+
         $exceptions->render(function (ValidationException $e, Request $request) {
-            if (! $request->expectsJson()) {
-                return null;
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dữ liệu đầu vào không hợp lệ',
+                    'errors' => $e->errors(),
+                    'data' => null,
+                ], 422);
             }
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'errors' => $e->errors(),
-                'data' => null,
-            ], 422);
         });
-        $exceptions->render(function (ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không tìm thấy tài nguyên',
-                'data' => null,
-            ], 404);
+
+        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy tài nguyên',
+                    'data' => null,
+                ], 404);
+            }
+        });
+
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => config('app.debug') ? $e->getMessage() : 'Đã xảy ra lỗi máy chủ.',
+                    'data' => null,
+                ], 500);
+            }
         });
     })->create();

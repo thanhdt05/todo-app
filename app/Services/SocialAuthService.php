@@ -17,7 +17,7 @@ class SocialAuthService
         $providerToken = "{$provider}_token";
         $providerRefreshToken = "{$provider}_refresh_token";
 
-        if (!$socialId || !$email) {
+        if (! $socialId || ! $email) {
             throw new Exception(strtoupper($provider).' không trả về đủ thông tin tài khoản.');
         }
 
@@ -26,11 +26,11 @@ class SocialAuthService
             ->orWhere('email', $email)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             throw new Exception(strtoupper($provider).' Tài khoản không tồn tại.');
         }
 
-        if ($user->$providerId !== null && $user->$providerId !== $socialId) {
+        if ($user->$providerId !== null && $socialId !== $user->$providerId) {
             throw new Exception('Tài khoản đã được liên kết với tài khoản khác.');
         }
 

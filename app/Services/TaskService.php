@@ -9,7 +9,7 @@ class TaskService
 {
     public function getAll(User $user, array $filters)
     {
-        $query = $user->tasks()->latest();
+        $query = $user->tasks()->with('user')->latest();
 
         if (! empty($filters['status'])) {
             $query = $query->where('status', $filters['status']);
@@ -29,7 +29,7 @@ class TaskService
 
     public function getAllTrashed(User $user, array $filters)
     {
-        $query = $user->tasks()->onlyTrashed()->latest();
+        $query = $user->tasks()->with('user')->onlyTrashed()->latest();
 
         if (! empty($filters['q'])) {
             $keyword = mb_strtolower($filters['q']);
@@ -45,12 +45,12 @@ class TaskService
 
     public function findById(User $user, string $id)
     {
-        return $user->tasks()->findOrFail($id);
+        return Task::with('user')->findOrFail($id);
     }
 
     public function findDeletedById(User $user, string $id)
     {
-        return $user->tasks()->onlyTrashed()->findOrFail($id);
+        return Task::with('user')->onlyTrashed()->findOrFail($id);
     }
 
     public function create(User $user, array $data): Task

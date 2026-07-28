@@ -393,10 +393,10 @@ const handleGetTasksList = async (page: number = 1) => {
     });
 
     if (response.data?.data) {
-      tasks.value = response.data.data.data;
-      currentPage.value = response.data.data.current_page;
-      totalTasks.value = response.data.data.total;
-      lastPage.value = response.data.data.last_page;
+      tasks.value = response.data.data;
+      currentPage.value = response.data.meta.current_page;
+      totalTasks.value = response.data.meta.total;
+      lastPage.value = response.data.meta.last_page;
       selectedTaskIds.value = [];
     }
   } catch (error: any) {

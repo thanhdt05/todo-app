@@ -644,10 +644,10 @@ const handleGetTasksList = async (page: number = 1) => {
     });
 
     if (response.data?.data) {
-      tasks.value = response.data.data.data;
-      currentPage.value = response.data.data.current_page;
-      lastPage.value = response.data.data.last_page;
-      totalTasks.value = response.data.data.total;
+      tasks.value = response.data.data;
+      currentPage.value = response.data.meta.current_page;
+      lastPage.value = response.data.meta.last_page;
+      totalTasks.value = response.data.meta.total;
     }
   } catch (error: any) {
     handleApiError(error, 'Lấy danh sách công việc thất bại');
@@ -673,7 +673,7 @@ const handleGetSingleTask = async (taskId: number) => {
     });
 
     if (response.data?.data) {
-      return response.data.data.data;
+      return response.data.data;
     }
   } catch (error: any) {
     handleApiError(error, 'Lấy chi tiết công việc thất bại');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use App\Traits\HttpResponse;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     use HttpResponse;
+
     public function __construct(
         private AuthService $authService
     ) {}
@@ -33,7 +35,7 @@ class AuthController extends Controller
         return $this->success([
             'user' => $data['user'],
             'token' => $data['token'],
-        ], 'Đăng nhập thành công'); 
+        ], 'Đăng nhập thành công');
     }
 
     public function logout(Request $request)
@@ -45,6 +47,9 @@ class AuthController extends Controller
 
     public function show(Request $request)
     {
-        return $this->success($request->user(), 'Lấy thông tin người dùng thành công');
+        return $this->success(
+            UserResource::make($request->user()),
+            'Lấy thông tin người dùng thành công'
+        );
     }
 }
