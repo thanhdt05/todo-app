@@ -8,24 +8,27 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider;
 
 class SocialAuthController extends Controller
 {
-    protected $allowedProviders = ['microsoft'];
+    protected $allowedProviders = ['microsoft', 'google'];
 
     public function __construct(
         private SocialAuthService $socialAuthService
     ) {}
-    
+
     public function redirect(string $provider): RedirectResponse
     {
         $this->validateProvider($provider);
-        /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+        /** @var AbstractProvider $driver */
         $driver = Socialite::driver($provider);
 
-        return $driver
-            ->scopes(['openid', 'profile', 'email', 'User.Read'])
-            ->redirect();
+        if ($provider === 'microsoft') {
+            $driver->scopes(['openid', 'profile', 'email', 'User.Read']);
+        }
+
+        return $driver->redirect();
     }
 
     public function callback(string $provider): RedirectResponse
@@ -52,7 +55,7 @@ class SocialAuthController extends Controller
 
     private function validateProvider(string $provider): void
     {
-        if (!in_array($provider, $this->allowedProviders)) {
+        if (! in_array($provider, $this->allowedProviders)) {
             throw new \Exception('Phương thức xác thực không được hỗ trợ');
         }
     }
