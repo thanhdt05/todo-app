@@ -75,9 +75,11 @@ class SocialAuthController extends Controller
             return $this->error('Mã xác thực không hợp lệ hoặc đã hết hạn', 400);
         }
 
-        return $this->success([
+        return $this->success(
             $result,
-        ], 'Đăng nhập thành công', 200);
+            'Đăng nhập thành công',
+            200
+        );
     }
 
     private function validateProvider(string $provider): void
