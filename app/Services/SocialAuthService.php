@@ -5,10 +5,14 @@ namespace App\Services;
 use App\Models\SocialAccount;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
+use Laravel\Socialite\Socialite;
 
 class SocialAuthService
 {
+    private const EXCHANGE_CODE_TTL_SECONDS = 60;
+
     public function findOrLinkUser(string $provider, SocialiteUser $socialUser): User
     {
         $email = $socialUser->getEmail();
@@ -48,5 +52,51 @@ class SocialAuthService
         );
 
         return $user;
+    }
+
+    public function handleCallback(string $provider): string
+    {
+        $socialUser = Socialite::driver($provider)->user();
+
+        $user = $this->findOrLinkUser(
+            $provider,
+            $socialUser
+        );
+
+        return $this->createExchangeCode($user);
+    }
+
+    public function exchangeCode(string $code): ?array
+    {
+        $cacheKey = "social_exchange_{$code}";
+
+        $userId = Cache::pull($cacheKey);
+        if (! $userId) {
+            return null;
+        }
+
+        $user = User::find($userId);
+
+        if (! $user) {
+            return null;
+        }
+
+        return [
+            'token' => $user->createToken('social-login')->plainTextToken,
+            'user' => $user,
+        ];
+    }
+
+    private function createExchangeCode(User $user): string
+    {
+        $code = str()->random(40);
+
+        Cache::put(
+            "social_exchange_{$code}",
+            $user->id,
+            now()->addSeconds(self::EXCHANGE_CODE_TTL_SECONDS)
+        );
+
+        return $code;
     }
 }

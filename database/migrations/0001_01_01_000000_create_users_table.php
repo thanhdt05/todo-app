@@ -19,9 +19,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role')->default(UserRole::USER->value);
-            $table->string('microsoft_id')->nullable();
-            $table->text('microsoft_token')->nullable();
-            $table->text('microsoft_refresh_token')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });
@@ -47,8 +45,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

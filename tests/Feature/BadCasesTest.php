@@ -79,3 +79,4 @@ test('validates invalid task creation data', function (
         ->assertUnprocessable()
         ->assertJsonValidationErrors($errors);
 })->with('invalid task data');
+

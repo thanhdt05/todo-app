@@ -250,4 +250,33 @@ class TasksFeatureTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonPath('data.is_overdue', false);
     }
+
+    public function test_allows_changing_tasks_per_page()
+    {
+        $user = User::factory()->create();
+
+        Task::factory()->count(20)->for($user)->create();
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/tasks?per_page=10');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(10, 'data')
+            ->assertJsonPath('meta.per_page', 10);
+    }
+
+    public function test_can_update_overdue_task_title_without_changing_overdue_due_date()
+    {
+        $user = User::factory()->create();
+        $overdueTask = Task::factory()->for($user)->create([
+            'due_date' => now()->subDays(5)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->patchJson("/api/tasks/{$overdueTask->id}", [
+            'title' => 'Updated Title for Overdue Task',
+            'due_date' => $overdueTask->due_date,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.title', 'Updated Title for Overdue Task');
+    }
 }

@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 // Auth routes
 Route::middleware('throttle:10,1')->prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
+
+    Route::post('social/exchange', [SocialAuthController::class, 'exchange']);
 });
 
 // Protected routes

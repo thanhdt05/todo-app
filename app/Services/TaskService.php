@@ -34,10 +34,7 @@ class TaskService
      */
     public function getAllTrashed(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = Task::query()
-            ->with('user')
-            ->onlyTrashed()
-            ->latest();
+        $query = Task::query()->with('user')->onlyTrashed()->latest();
 
         $this->applyUserScope($query, $user);
         $this->keywordFilter($query, $filters['keyword'] ?? null);
@@ -58,9 +55,7 @@ class TaskService
 
     public function findDeletedById(User $user, string $id): Task
     {
-        $query = Task::query()
-            ->with('user')
-            ->onlyTrashed();
+        $query = Task::query()->with('user')->onlyTrashed();
 
         $this->applyUserScope($query, $user);
 
@@ -78,23 +73,17 @@ class TaskService
             'description' => $data['description'] ?? null,
             'due_date' => $data['due_date'] ?? null,
             'status' => $status,
-            'completed_at' => $status === TaskStatus::DONE
-                ? now()
-                : null,
+            'completed_at' => $status === TaskStatus::DONE ? now() : null,
         ])->load('user');
     }
 
-    public function update(User $user, string $id, array $data): Task
+    public function update(Task $task, array $data): Task
     {
-        $task = $this->findById($user, $id);
-
         if (array_key_exists('status', $data)) {
             $newStatus = TaskStatus::from($data['status']);
 
             $data['status'] = $newStatus;
-            $data['completed_at'] = $newStatus === TaskStatus::DONE
-                ? ($task->completed_at ?? now())
-                : null;
+            $data['completed_at'] = $newStatus === TaskStatus::DONE ? ($task->completed_at ?? now()) : null;
         }
 
         $task->update($data);
@@ -102,9 +91,8 @@ class TaskService
         return $task->refresh()->load('user');
     }
 
-    public function complete(User $user, string $id): Task
+    public function complete(Task $task): Task
     {
-        $task = $this->findById($user, $id);
 
         $task->update([
             'status' => TaskStatus::DONE,
@@ -114,23 +102,21 @@ class TaskService
         return $task->refresh()->load('user');
     }
 
-    public function restore(User $user, string $id): Task
+    public function restore(Task $task): Task
     {
-        $task = $this->findDeletedById($user, $id);
-
         $task->restore();
 
         return $task->refresh()->load('user');
     }
 
-    public function delete(User $user, string $id): void
+    public function delete(Task $task): bool
     {
-        $this->findById($user, $id)->delete();
+        return $task->delete();
     }
 
-    public function forceDelete(User $user, string $id): void
+    public function forceDelete(Task $task): bool
     {
-        $this->findDeletedById($user, $id)->forceDelete();
+        return $task->forceDelete();
     }
 
     private function applyUserScope(Builder $query, User $user): void

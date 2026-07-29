@@ -6,6 +6,7 @@ import TaskLayout from '@/components/TaskLayout.vue';
 import TrashedTasksList from '@/components/TrashedTasksList.vue';
 import Profile from '@/components/Profile.vue';
 import AuthCallback from '@/components/AuthCallback.vue';
+import { isToken } from 'typescript';
 
 const routes = [
   {
@@ -31,6 +32,7 @@ const routes = [
     path: '/tasks',
     name: 'TaskLayout',
     component: TaskLayout,
+    meta: { requiresAuth: true },
     children: [
       {
         path: 'profile',
@@ -54,6 +56,18 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to) => {
+  const token = localStorage.getItem('token');
+
+  if (to.matched.some((record) => record.meta.requiresAuth) && !token) {
+    return { name: 'Login' };
+  }
+
+  if ((to.name === 'Login' || to.name === 'Register') && token) {
+    return { name: 'TasksList' };
+  }
 });
 
 export default router;

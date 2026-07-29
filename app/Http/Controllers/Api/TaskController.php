@@ -27,6 +27,7 @@ class TaskController extends Controller
         $tasks = $this->taskService->getAll($request->user(), [
             'keyword' => $request->input('keyword'),
             'status' => $request->input('status'),
+            'per_page' => $request->input('per_page'),
         ]);
 
         return $this->paginated(
@@ -40,6 +41,7 @@ class TaskController extends Controller
         $this->authorize('viewAny', Task::class);
         $tasks = $this->taskService->getAllTrashed($request->user(), [
             'keyword' => $request->input('keyword'),
+            'per_page' => $request->input('per_page'),
         ]);
 
         return $this->paginated(
@@ -86,7 +88,7 @@ class TaskController extends Controller
         $task = $this->taskService->findById($request->user(), $id);
         $this->authorize('update', $task);
 
-        $updatedTask = $this->taskService->update($request->user(), $id, $request->validated());
+        $updatedTask = $this->taskService->update($task, $request->validated());
 
         return $this->success(
             TasksResource::make($updatedTask),
@@ -99,7 +101,7 @@ class TaskController extends Controller
         $task = $this->taskService->findDeletedById($request->user(), $id);
         $this->authorize('restore', $task);
 
-        $restoredTask = $this->taskService->restore($request->user(), $id);
+        $restoredTask = $this->taskService->restore($task);
 
         return $this->success(
             TasksResource::make($restoredTask),
@@ -112,7 +114,7 @@ class TaskController extends Controller
         $task = $this->taskService->findById($request->user(), $id);
         $this->authorize('complete', $task);
 
-        $completedTask = $this->taskService->complete($request->user(), $id);
+        $completedTask = $this->taskService->complete($task);
 
         return $this->success(
             TasksResource::make($completedTask),
@@ -125,7 +127,7 @@ class TaskController extends Controller
         $task = $this->taskService->findById($request->user(), $id);
         $this->authorize('delete', $task);
 
-        $this->taskService->delete($request->user(), $id);
+        $this->taskService->delete($task);
 
         return $this->success(
             data : null,
@@ -141,7 +143,7 @@ class TaskController extends Controller
         $task = $this->taskService->findDeletedById($request->user(), $id);
         $this->authorize('forceDelete', $task);
 
-        $this->taskService->forceDelete($request->user(), $id);
+        $this->taskService->forceDelete($task);
 
         return $this->success(
             data: null,

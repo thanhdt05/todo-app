@@ -15,8 +15,9 @@
           <span class="hidden sm:inline">Xin chào, {{ user.name || 'User' }}</span>
         </RouterLink>
 
-        <RouterLink
-          to="/login"
+        <button
+          type="button"
+          @click="handleLogout"
           class="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-xl transition cursor-pointer flex items-center space-x-1 border border-red-100 shadow-2xs"
           title="Đăng xuất"
         >
@@ -35,7 +36,7 @@
             />
           </svg>
           <span class="hidden sm:inline">Đăng xuất</span>
-        </RouterLink>
+        </button>
       </div>
     </div>
 
@@ -83,9 +84,10 @@
 <script setup lang="ts">
 import api from '../services/api';
 import { ref, onMounted, provide } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 
 interface User {
   id: number | null;
@@ -112,6 +114,16 @@ const fetchUser = async () => {
     }
   } catch (error) {
     console.error('Không thể lấy thông tin người dùng:', error);
+  }
+};
+
+const handleLogout = async () => {
+  try {
+    await api.post('/logout');
+  } catch (error) {
+  } finally {
+    localStorage.removeItem('token');
+    router.push('/login');
   }
 };
 

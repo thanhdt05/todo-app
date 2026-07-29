@@ -4,14 +4,18 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\SocialAuthService;
+use App\Traits\HttpResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\AbstractProvider;
+use SocialiteProviders\Manager\OAuth2\AbstractProvider;
 
 class SocialAuthController extends Controller
 {
+    use HttpResponse;
+
     private const ALLOWED_PROVIDERS = ['microsoft', 'google'];
 
     public function __construct(
@@ -31,31 +35,49 @@ class SocialAuthController extends Controller
         return $driver->with(['prompt' => 'select_account'])->redirect();
     }
 
-    public function callback(string $provider): RedirectResponse
+    public function callback(Request $request, string $provider): RedirectResponse
     {
+        $this->validateProvider($provider);
+
+        if ($request->hasAny(['error', 'error_description'])) {
+            return $this->redirectToLogin(
+                'Bạn đã hủy đăng nhập bằng '.ucfirst($provider)
+            );
+        }
+
         try {
-            $this->validateProvider($provider);
+            $exchangeCode = $this->socialAuthService->handleCallback($provider);
 
-            if (request()->has('error') || request()->has('error_description')) {
-                return redirect()->route('login')->with('error', 'Bạn đã hủy đăng nhập bằng '.ucfirst($provider));
-            }
+            $frontendUrl = rtrim(config('app.frontend_url'), '/');
 
-            $socialUser = Socialite::driver($provider)->user();
-
-            $user = $this->socialAuthService->findOrLinkUser($provider, $socialUser);
-
-            Auth::login($user);
-
-            $token = $user->createToken($provider.'-login')->plainTextToken;
-
-            return redirect()->away("http://localhost:5173/auth/callback?token={$token}");
+            return redirect()->away("{$frontendUrl}/auth/callback?exchange_code=".rawurlencode($exchangeCode));
         } catch (\Exception $e) {
-            Log::error($provider.' Lỗi xác thực: '.$e->getMessage(), [
+            Log::error("Social authentication failed [{$provider}]: ".$e->getMessage(), [
                 'exception' => $e,
             ]);
 
-            return redirect()->route('login')->with('error', 'Không thể xác thực bằng '.ucfirst($provider).': '.$e->getMessage());
+            return redirect()->route('login')->with(
+                'error',
+                'Không thể đăng nhập bằng '.ucfirst($provider).'. Vui lòng thử lại sau.'
+            );
         }
+    }
+
+    public function exchange(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'size:40'],
+        ]);
+
+        $result = $this->socialAuthService->exchangeCode($validated['code']);
+
+        if (! $result) {
+            return $this->error('Mã xác thực không hợp lệ hoặc đã hết hạn', 400);
+        }
+
+        return $this->success([
+            $result,
+        ], 'Đăng nhập thành công', 200);
     }
 
     private function validateProvider(string $provider): void
@@ -65,5 +87,10 @@ class SocialAuthController extends Controller
             404,
             'Phương thức xác thực không được hỗ trợ.'
         );
+    }
+
+    private function redirectToLogin(string $message): RedirectResponse
+    {
+        return redirect()->route('login')->with('error', $message);
     }
 }
