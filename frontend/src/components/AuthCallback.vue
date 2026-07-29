@@ -1,6 +1,6 @@
 <template>
-  <div style="text-align: center; margin-top: 50px">
-    <p>Đang đăng nhập, vui lòng chờ trong giây lát...</p>
+  <div class="flex items-center justify-center min-h-screen">
+    <p class="text-slate-500 font-medium">Đang xử lý đăng nhập...</p>
   </div>
 </template>
 
@@ -12,13 +12,13 @@ const route = useRoute();
 const router = useRouter();
 
 onMounted(() => {
-  const token = route.query.token;
+  const token = route.query.token as string;
 
   if (token) {
-    localStorage.setItem('token', token.toString());
-    router.push('/tasks');
+    localStorage.setItem('token', token);
+    router.replace('/tasks');
   } else {
-    router.push('/login');
+    router.replace('/login');
   }
 });
 </script>

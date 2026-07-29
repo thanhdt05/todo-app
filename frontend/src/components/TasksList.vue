@@ -436,7 +436,7 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios';
+import api from '../services/api';
 import { useRouter } from 'vue-router';
 import { ref, computed, onMounted, watch } from 'vue';
 import TaskSearch from './TaskSearch.vue';
@@ -556,19 +556,6 @@ interface Task {
 const tasks = ref<Task[]>([]);
 
 const keyword = ref('');
-const filterTasks = computed(() => {
-  return tasks.value.filter((task) => {
-    const query = keyword.value.toLowerCase().trim();
-    const matchSearch =
-      !query ||
-      task.title.toLowerCase().includes(query) ||
-      task.description?.toLowerCase().includes(query);
-
-    const matchTab = currentTab.value === 'ALL' || task.status.toUpperCase() === currentTab.value;
-
-    return matchSearch && matchTab;
-  });
-});
 
 const currentPage = ref(1);
 const lastPage = ref(1);
@@ -620,13 +607,6 @@ const handleGetTasksList = async (page: number = 1) => {
   try {
     errorMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
     const params: any = { page };
     if (keyword.value) {
       params.keyword = keyword.value;
@@ -635,19 +615,14 @@ const handleGetTasksList = async (page: number = 1) => {
       params.status = currentTab.value.toLowerCase();
     }
 
-    const response = await axios.get('http://localhost:8000/api/tasks', {
-      params,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const response = await api.get('/tasks', { params });
 
     if (response.data?.data) {
-      tasks.value = response.data.data;
-      currentPage.value = response.data.meta.current_page;
-      lastPage.value = response.data.meta.last_page;
-      totalTasks.value = response.data.meta.total;
+      const rawTasks = Array.isArray(response.data.data) ? response.data.data : [];
+      tasks.value = rawTasks.filter((task: Task | null) => task !== null && task !== undefined);
+      currentPage.value = response.data.meta?.current_page ?? 1;
+      lastPage.value = response.data.meta?.last_page ?? 1;
+      totalTasks.value = response.data.meta?.total ?? tasks.value.length;
     }
   } catch (error: any) {
     handleApiError(error, 'Lấy danh sách công việc thất bại');
@@ -658,19 +633,7 @@ const handleGetSingleTask = async (taskId: number) => {
   try {
     errorMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
-    const response = await axios.get(`http://localhost:8000/api/tasks/${taskId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const response = await api.get(`/tasks/${taskId}`);
 
     if (response.data?.data) {
       return response.data.data;
@@ -683,23 +646,7 @@ const handleGetSingleTask = async (taskId: number) => {
 const handleToggleTask = async (task: Task) => {
   if (task.status === 'done') return;
   try {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
-    const response = await axios.put(
-      `http://localhost:8000/api/tasks/${task.id}/complete`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      }
-    );
+    const response = await api.put(`/tasks/${task.id}/complete`);
 
     if (response.data) {
       successMessage.value = response.data.message;
@@ -727,19 +674,7 @@ const handleAddNewTask = async () => {
     errorMessage.value = '';
     successMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
-    const response = await axios.post('http://localhost:8000/api/tasks', taskForm.value, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const response = await api.post('/tasks', taskForm.value);
 
     if (response.data) {
       successMessage.value = response.data.message;
@@ -756,23 +691,7 @@ const handleEditTask = async (taskId: number) => {
     errorMessage.value = '';
     successMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
-    const response = await axios.patch(
-      `http://localhost:8000/api/tasks/${taskId}`,
-      taskForm.value,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      }
-    );
+    const response = await api.patch(`/tasks/${taskId}`, taskForm.value);
 
     if (response.data) {
       successMessage.value = response.data.message;
@@ -789,19 +708,7 @@ const handleDeleteTask = async (task: Task) => {
     errorMessage.value = '';
     successMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
-    const response = await axios.delete(`http://localhost:8000/api/tasks/${task.id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const response = await api.delete(`/tasks/${task.id}`);
 
     if (response.data) {
       successMessage.value = response.data.message;

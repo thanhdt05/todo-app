@@ -18,6 +18,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/logout', function () {
         Auth::logout();
+
         return redirect('/');
     })->name('logout');
 });

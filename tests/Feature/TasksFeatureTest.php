@@ -43,21 +43,22 @@ class TasksFeatureTest extends TestCase
                 'success',
                 'message',
                 'data' => [
-                    'current_page',
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'title',
-                            'description',
-                            'status',
-                            'due_date',
-                            'is_overdue',
-                        ],
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'status',
+                        'due_date',
+                        'is_overdue',
                     ],
+                ],
+                'meta' => [
+                    'current_page',
                     'last_page',
                     'per_page',
                     'total',
                 ],
+                'links',
             ]);
     }
 
@@ -76,21 +77,22 @@ class TasksFeatureTest extends TestCase
                 'success',
                 'message',
                 'data' => [
-                    'current_page',
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'title',
-                            'description',
-                            'status',
-                            'due_date',
-                            'is_overdue',
-                        ],
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'status',
+                        'due_date',
+                        'is_overdue',
                     ],
+                ],
+                'meta' => [
+                    'current_page',
                     'last_page',
                     'per_page',
                     'total',
                 ],
+                'links',
             ]);
     }
 
@@ -126,21 +128,22 @@ class TasksFeatureTest extends TestCase
                 'success',
                 'message',
                 'data' => [
-                    'current_page',
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'title',
-                            'description',
-                            'status',
-                            'due_date',
-                            'is_overdue',
-                        ],
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'status',
+                        'due_date',
+                        'is_overdue',
                     ],
+                ],
+                'meta' => [
+                    'current_page',
                     'last_page',
                     'per_page',
                     'total',
                 ],
+                'links',
             ]);
     }
 

@@ -12,7 +12,7 @@ use Laravel\Socialite\Two\AbstractProvider;
 
 class SocialAuthController extends Controller
 {
-    protected $allowedProviders = ['microsoft', 'google'];
+    private const ALLOWED_PROVIDERS = ['microsoft', 'google'];
 
     public function __construct(
         private SocialAuthService $socialAuthService
@@ -28,16 +28,21 @@ class SocialAuthController extends Controller
             $driver->scopes(['openid', 'profile', 'email', 'User.Read']);
         }
 
-        return $driver->redirect();
+        return $driver->with(['prompt' => 'select_account'])->redirect();
     }
 
     public function callback(string $provider): RedirectResponse
     {
         try {
             $this->validateProvider($provider);
+
+            if (request()->has('error') || request()->has('error_description')) {
+                return redirect()->route('login')->with('error', 'Bạn đã hủy đăng nhập bằng '.ucfirst($provider));
+            }
+
             $socialUser = Socialite::driver($provider)->user();
 
-            $user = $this->socialAuthService->findUser($provider, $socialUser);
+            $user = $this->socialAuthService->findOrLinkUser($provider, $socialUser);
 
             Auth::login($user);
 
@@ -55,8 +60,10 @@ class SocialAuthController extends Controller
 
     private function validateProvider(string $provider): void
     {
-        if (! in_array($provider, $this->allowedProviders)) {
-            throw new \Exception('Phương thức xác thực không được hỗ trợ');
-        }
+        abort_unless(
+            in_array($provider, self::ALLOWED_PROVIDERS, true),
+            404,
+            'Phương thức xác thực không được hỗ trợ.'
+        );
     }
 }

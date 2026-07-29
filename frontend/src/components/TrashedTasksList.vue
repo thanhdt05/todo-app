@@ -254,7 +254,7 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios';
+import api from '../services/api';
 import { ref, computed, onMounted, watch } from 'vue';
 import TaskSearch from './TaskSearch.vue';
 import Pagination from './Pagination.vue';
@@ -280,18 +280,6 @@ const tasks = ref<Task[]>([]);
 const selectedTaskIds = ref<number[]>([]);
 const keyword = ref('');
 
-const filterTasks = computed(() => {
-  return tasks.value.filter((task) => {
-    const query = keyword.value.toLowerCase().trim();
-    const matchSearch =
-      !query ||
-      task.title.toLowerCase().includes(query) ||
-      task.description?.toLowerCase().includes(query);
-
-    return matchSearch;
-  });
-});
-
 const isDeleteModalOpen = ref(false);
 const taskToDelete = ref<Task | null>(null);
 
@@ -312,15 +300,19 @@ const confirmDelete = async () => {
   }
 };
 
+const validTasks = computed(() =>
+  tasks.value.filter((t): t is Task => t !== null && t !== undefined)
+);
+
 const isSelectAll = computed(() => {
-  return tasks.value.length > 0 && selectedTaskIds.value.length === tasks.value.length;
+  return validTasks.value.length > 0 && selectedTaskIds.value.length === validTasks.value.length;
 });
 
 const toggleSelectAll = () => {
   if (isSelectAll.value) {
     selectedTaskIds.value = [];
   } else {
-    selectedTaskIds.value = tasks.value.map((task) => task.id);
+    selectedTaskIds.value = validTasks.value.map((task) => task.id);
   }
 };
 
@@ -372,31 +364,19 @@ const handleGetTasksList = async (page: number = 1) => {
   try {
     errorMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
     const params: any = { page };
     if (keyword.value) {
       params.keyword = keyword.value;
     }
 
-    const response = await axios.get('http://localhost:8000/api/tasks/trashed', {
-      params,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const response = await api.get('/tasks/trashed', { params });
 
     if (response.data?.data) {
-      tasks.value = response.data.data;
-      currentPage.value = response.data.meta.current_page;
-      totalTasks.value = response.data.meta.total;
-      lastPage.value = response.data.meta.last_page;
+      const rawTasks = Array.isArray(response.data.data) ? response.data.data : [];
+      tasks.value = rawTasks.filter((task: Task | null) => task !== null && task !== undefined);
+      currentPage.value = response.data.meta?.current_page ?? 1;
+      lastPage.value = response.data.meta?.last_page ?? 1;
+      totalTasks.value = response.data.meta?.total ?? tasks.value.length;
       selectedTaskIds.value = [];
     }
   } catch (error: any) {
@@ -409,19 +389,7 @@ const handleDeleteTask = async (task: Task) => {
     errorMessage.value = '';
     successMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
-    const response = await axios.delete(`http://localhost:8000/api/tasks/${task.id}/force`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const response = await api.delete(`/tasks/${task.id}/force`);
 
     if (response.data) {
       successMessage.value = response.data.message;
@@ -437,23 +405,7 @@ const handleRestoreTask = async (task: Task) => {
     errorMessage.value = '';
     successMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
-    const response = await axios.put(
-      `http://localhost:8000/api/tasks/${task.id}/restore`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      }
-    );
+    const response = await api.put(`/tasks/${task.id}/restore`);
 
     if (response.data) {
       successMessage.value = response.data.message;
@@ -469,25 +421,9 @@ const handleRestoreSelectedTasks = async () => {
     errorMessage.value = '';
     successMessage.value = '';
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      errorMessage.value = 'Bạn chưa đăng nhập';
-      return;
-    }
-
     await Promise.all(
       selectedTaskIds.value.map(async (id) => {
-        return axios.put(
-          `http://localhost:8000/api/tasks/${id}/restore`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: 'application/json',
-            },
-          }
-        );
+        return api.put(`/tasks/${id}/restore`);
       })
     );
 

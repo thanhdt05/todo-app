@@ -20,7 +20,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/trashed', [TaskController::class, 'getAllTrashedTasks']);
         Route::get('{id}', [TaskController::class, 'show']);
         Route::post('/', [TaskController::class, 'store']);
-        Route::patch('{id}', [TaskController::class, 'update']);
+        Route::match(['put', 'patch'], '{id}', [TaskController::class, 'update']);
         Route::put('{id}/restore', [TaskController::class, 'restore']);
         Route::put('{id}/complete', [TaskController::class, 'complete']);
         Route::delete('{id}', [TaskController::class, 'delete']);

@@ -18,15 +18,10 @@ use Laravel\Sanctum\HasApiTokens;
     'name',
     'email',
     'password',
-    'microsoft_id',
-    'microsoft_token',
-    'microsoft_refresh_token',
 ])]
 #[Hidden([
     'password',
     'remember_token',
-    'microsoft_token',
-    'microsoft_refresh_token',
 ])]
 class User extends Authenticatable
 {
@@ -45,8 +40,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'microsoft_token' => 'encrypted',
-            'microsoft_refresh_token' => 'encrypted',
             'role' => UserRole::class,
         ];
     }
@@ -54,6 +47,11 @@ class User extends Authenticatable
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
     }
 
     public function isAdmin(): bool

@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios';
+import api from '../services/api';
 import { ref, onMounted, provide } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -105,15 +105,7 @@ provide('user', user);
 
 const fetchUser = async () => {
   try {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    const response = await axios.get('http://localhost:8000/api/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const response = await api.get('/me');
 
     if (response.data?.data) {
       user.value = response.data.data;

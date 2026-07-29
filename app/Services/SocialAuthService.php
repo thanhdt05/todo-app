@@ -2,42 +2,50 @@
 
 namespace App\Services;
 
+use App\Models\SocialAccount;
 use App\Models\User;
 use Exception;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 
 class SocialAuthService
 {
-    public function findUser(string $provider, SocialiteUser $socialUser): User
+    public function findOrLinkUser(string $provider, SocialiteUser $socialUser): User
     {
         $email = $socialUser->getEmail();
         $socialId = $socialUser->getId();
-
-        $providerId = "{$provider}_id";
-        $providerToken = "{$provider}_token";
-        $providerRefreshToken = "{$provider}_refresh_token";
 
         if (! $socialId || ! $email) {
             throw new Exception(strtoupper($provider).' không trả về đủ thông tin tài khoản.');
         }
 
-        $user = User::query()
-            ->where($providerId, $socialId)
-            ->orWhere('email', $email)
-            ->first();
+        $user = User::firstWhere('email', $email);
 
         if (! $user) {
-            throw new Exception(strtoupper($provider).' Tài khoản không tồn tại.');
+            throw new Exception('Tài khoản không tồn tại.');
         }
 
-        if ($user->$providerId !== null && $socialId !== $user->$providerId) {
-            throw new Exception('Tài khoản đã được liên kết với tài khoản khác.');
+        $existingSocialAccount = SocialAccount::firstWhere([
+            'provider' => $provider,
+            'provider_id' => $socialId,
+        ]);
+
+        if ($existingSocialAccount && $existingSocialAccount->user_id !== $user->id) {
+            throw new Exception('Tài khoản '.strtoupper($provider).' này đã được liên kết với một người dùng khác.');
         }
 
-        $user->$providerId = $socialId;
-        $user->$providerToken = $socialUser->token ?? null;
-        $user->$providerRefreshToken = $socialUser->refreshToken ?? null;
-        $user->save();
+        SocialAccount::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'provider' => $provider,
+            ],
+            [
+                'provider_id' => $socialId,
+                'provider_email' => $email,
+                'access_token' => $socialUser->token ?? null,
+                'refresh_token' => $socialUser->refreshToken ?? null,
+                'expires_at' => isset($socialUser->expiresIn) ? now()->addSeconds($socialUser->expiresIn) : null,
+            ]
+        );
 
         return $user;
     }

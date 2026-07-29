@@ -146,8 +146,7 @@ class TaskService
             return;
         }
 
-        $keyword = mb_strtolower(trim($keyword));
-
+        $keyword = trim($keyword);
         $query->where(function (Builder $query) use ($keyword) {
             $query->where('title', 'ILIKE', "%{$keyword}%")
                 ->orWhere('description', 'ILIKE', "%{$keyword}%");

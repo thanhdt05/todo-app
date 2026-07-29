@@ -9,14 +9,12 @@ trait HttpResponse
     protected function success(
         mixed $data = [],
         ?string $message = null,
-        int $code = 200,
-        array $meta = []
+        int $code = 200
     ) {
         return response()->json([
             'success' => true,
             'message' => $message,
             'data' => $data,
-            'meta' => $meta,
         ], $code);
     }
 
@@ -41,7 +39,7 @@ trait HttpResponse
         return response()->json([
             'success' => true,
             'message' => $message,
-            'data' => $response['data'],
+            'data' => $response['data'] ?? [],
             'meta' => $response['meta'] ?? [],
             'links' => $response['links'] ?? [],
         ], 200);

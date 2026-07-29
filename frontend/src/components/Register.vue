@@ -104,7 +104,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '../services/api';
 import { ref } from 'vue';
 
 const router = useRouter();
@@ -123,7 +123,7 @@ const handleRegister = async () => {
     errorMessage.value = '';
     successMessage.value = '';
 
-    const response = await axios.post('http://localhost:8000/api/auth/register', formData.value);
+    const response = await api.post('/auth/register', formData.value);
 
     if (response.data.data) {
       localStorage.setItem('token', response.data.data.token);
