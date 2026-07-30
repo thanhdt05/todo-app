@@ -20,13 +20,15 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     Route::prefix('tasks')->group(function () {
         Route::get('/', [TaskController::class, 'index']);
-        Route::get('/trashed', [TaskController::class, 'getAllTrashedTasks']);
-        Route::get('{id}', [TaskController::class, 'show']);
+        Route::get('trashed', [TaskController::class, 'getAllTrashedTasks']);
+        Route::put('bulk-restore', [TaskController::class, 'bulkRestore']);
         Route::post('/', [TaskController::class, 'store']);
-        Route::match(['put', 'patch'], '{id}', [TaskController::class, 'update']);
-        Route::put('{id}/restore', [TaskController::class, 'restore']);
-        Route::put('{id}/complete', [TaskController::class, 'complete']);
-        Route::delete('{id}', [TaskController::class, 'delete']);
-        Route::delete('{id}/force', [TaskController::class, 'destroy']);
+
+        Route::get('{id}', [TaskController::class, 'show'])->whereNumber('id');
+        Route::match(['put', 'patch'], '{id}', [TaskController::class, 'update'])->whereNumber('id');
+        Route::put('{id}/restore', [TaskController::class, 'restore'])->whereNumber('id');
+        Route::put('{id}/complete', [TaskController::class, 'complete'])->whereNumber('id');
+        Route::delete('{id}', [TaskController::class, 'delete'])->whereNumber('id');
+        Route::delete('{id}/force', [TaskController::class, 'destroy'])->whereNumber('id');
     });
 });

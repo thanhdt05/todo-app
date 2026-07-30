@@ -18,10 +18,16 @@ class SocialAuthController extends Controller
 
     private const ALLOWED_PROVIDERS = ['microsoft', 'google'];
 
+    /**
+     * Create a new controller instance.
+     */
     public function __construct(
         private SocialAuthService $socialAuthService
     ) {}
 
+    /**
+     * Redirect the user to the OAuth provider authentication page.
+     */
     public function redirect(string $provider): RedirectResponse
     {
         $this->validateProvider($provider);
@@ -35,14 +41,15 @@ class SocialAuthController extends Controller
         return $driver->with(['prompt' => 'select_account'])->redirect();
     }
 
+    /**
+     * Handle the OAuth provider callback and issue a one-time exchange code.
+     */
     public function callback(Request $request, string $provider): RedirectResponse
     {
         $this->validateProvider($provider);
 
         if ($request->hasAny(['error', 'error_description'])) {
-            return $this->redirectToLogin(
-                'Bạn đã hủy đăng nhập bằng '.ucfirst($provider)
-            );
+            return redirect()->route('login')->with('error', 'Bạn đã hủy đăng nhập bằng '.ucfirst($provider));
         }
 
         try {
@@ -63,6 +70,9 @@ class SocialAuthController extends Controller
         }
     }
 
+    /**
+     * Exchange a valid one-time code for a Sanctum access token.
+     */
     public function exchange(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -82,6 +92,9 @@ class SocialAuthController extends Controller
         );
     }
 
+    /**
+     * Validate whether the social authentication provider is supported.
+     */
     private function validateProvider(string $provider): void
     {
         abort_unless(
@@ -89,10 +102,5 @@ class SocialAuthController extends Controller
             404,
             'Phương thức xác thực không được hỗ trợ.'
         );
-    }
-
-    private function redirectToLogin(string $message): RedirectResponse
-    {
-        return redirect()->route('login')->with('error', $message);
     }
 }

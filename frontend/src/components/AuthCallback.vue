@@ -30,9 +30,6 @@ async function redirectToLogin(message: string): Promise<void> {
 
 async function completeLogin(token: string): Promise<void> {
   localStorage.setItem('token', token);
-
-  window.history.replaceState({}, document.title, window.location.pathname);
-
   await router.replace({ name: 'TasksList' });
 }
 

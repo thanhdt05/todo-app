@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BulkRestoreTaskRequest;
 use App\Http\Requests\IndexTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
@@ -106,6 +107,18 @@ class TaskController extends Controller
         return $this->success(
             TasksResource::make($restoredTask),
             'Khôi phục thành công'
+        );
+    }
+
+    public function bulkRestore(BulkRestoreTaskRequest $request)
+    {
+        $this->authorize('restoreAny', Task::class);
+
+        $restoredCount = $this->taskService->bulkRestore($request->user(), $request->validated());
+
+        return $this->success(
+            ['restored_count' => $restoredCount],
+            "Đã khôi phục thành công {$restoredCount} công việc"
         );
     }
 

@@ -1,67 +1,14 @@
 <template>
   <div>
-    <!-- Alert Notification Banners -->
-    <div
-      v-if="errorMessage"
-      class="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-center justify-between shadow-xs"
-    >
-      <div class="flex items-center space-x-2.5">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 text-red-500 shrink-0"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <span class="font-medium">{{ errorMessage }}</span>
-      </div>
-      <button
-        type="button"
-        @click="errorMessage = ''"
-        class="text-red-400 hover:text-red-600 font-bold text-lg cursor-pointer ml-3"
-      >
-        &times;
-      </button>
+    <div v-if="errorMessage" class="mb-4 p-3.5 bg-red-50 text-red-700 text-sm rounded-xl">
+      {{ errorMessage }}
     </div>
 
-    <div
-      v-if="successMessage"
-      class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl flex items-center justify-between shadow-xs"
-    >
-      <div class="flex items-center space-x-2.5">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 text-emerald-500 shrink-0"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <span class="font-medium">{{ successMessage }}</span>
-      </div>
-      <button
-        type="button"
-        @click="successMessage = ''"
-        class="text-emerald-400 hover:text-emerald-600 font-bold text-lg cursor-pointer ml-3"
-      >
-        &times;
-      </button>
+    <div v-if="successMessage" class="mb-4 p-3.5 bg-emerald-50 text-emerald-700 text-sm rounded-xl">
+      {{ successMessage }}
     </div>
 
-    <TaskSearch v-model="keyword" placeholder="Tìm kiếm công việc..." />
+    <TaskSearch v-model="keyword" placeholder="Tìm kiếm công việc trong thùng rác..." />
 
     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
       <label
@@ -76,366 +23,122 @@
         <span>Chọn tất cả ({{ selectedTaskIds.length }}/{{ tasks.length }})</span>
       </label>
 
-      <div class="flex items-center space-x-2">
-        <!-- Nút khôi phục các mục đã tick -->
-        <button
-          type="button"
-          @click="handleRestoreSelectedTasks"
-          class="px-3.5 py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center space-x-1"
-        >
-          <span>Khôi phục mục đã chọn</span>
-        </button>
-      </div>
+      <button
+        v-if="selectedTaskIds.length > 0"
+        type="button"
+        @click="handleBulkRestore"
+        class="px-3.5 py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer"
+      >
+        Khôi phục ({{ selectedTaskIds.length }})
+      </button>
     </div>
 
-    <!-- Task List Items -->
-    <ul class="space-y-2.5">
-      <li
+    <TaskEmpty v-if="!isLoading && tasks.length === 0" message="Thùng rác trống." />
+
+    <ul v-else class="space-y-2.5">
+      <TaskCard
         v-for="task in tasks"
         :key="task.id"
-        class="flex items-center justify-between px-4 py-3.5 bg-[#f4f6f7] rounded-xl hover:bg-[#eaeef1] transition"
-      >
-        <div class="flex items-center space-x-3.5 flex-1 min-w-0 pr-3">
-          <input
-            type="checkbox"
-            :value="task.id"
-            v-model="selectedTaskIds"
-            class="w-5 h-5 accent-blue-600 rounded cursor-pointer shrink-0"
-          />
-          <span class="truncate text-sm sm:text-base text-slate-700 font-medium">
-            {{ task.title }}
-          </span>
-        </div>
-
-        <div class="mx-3 shrink-0">
-          <span
-            class="px-2.5 py-1 text-xs font-bold rounded-full uppercase"
-            :class="{
-              'bg-amber-100 text-amber-700': task.status === 'todo',
-              'bg-blue-100 text-blue-700': task.status === 'doing',
-              'bg-emerald-100 text-emerald-700': task.status === 'done',
-            }"
-          >
-            {{ task.status }}
-          </span>
-        </div>
-
-        <div v-if="task.due_date" class="mx-2 shrink-0">
-          <span
-            class="text-xs flex items-center space-x-1"
-            :class="
-              task.is_overdue && task.status !== 'done'
-                ? 'text-red-500 font-semibold'
-                : 'text-slate-400'
-            "
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-3.5 w-3.5 inline"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <span>{{ formatDate(task.due_date) }}</span>
-          </span>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex items-center space-x-1 shrink-0">
-          <button
-            type="button"
-            @click="handleRestoreTask(task)"
-            class="p-1.5 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition cursor-pointer"
-            title="Khôi phục công việc"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            @click="openDeleteModal(task)"
-            class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
-            title="Xóa công việc"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          </button>
-        </div>
-      </li>
+        :task="task"
+        :is-trashed="true"
+        :is-selected="selectedTaskIds.includes(task.id)"
+        @toggle-select="toggleSelectTask"
+        @restore="restoreTask"
+        @force-delete="handleOpenForceDeleteModal"
+      />
     </ul>
 
     <Pagination
+      v-if="lastPage > 1"
       :current-page="currentPage"
       :total-pages="lastPage"
       :total="totalTasks"
-      @change="goTo"
+      @change="gotoPage"
     />
-  </div>
 
-  <div
-    v-if="isDeleteModalOpen"
-    class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4"
-  >
-    <div
-      class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4 border border-slate-100 text-center"
-    >
-      <div
-        class="w-12 h-12 rounded-full bg-red-100 text-red-500 mx-auto flex items-center justify-center"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          />
-        </svg>
-      </div>
-
-      <h3 class="text-lg font-bold text-slate-800">Xác nhận xóa vĩnh viễn</h3>
-
-      <p class="text-sm text-slate-600">Bạn có chắc chắn muốn xóa vĩnh viễn?</p>
-
-      <div class="flex items-center justify-center space-x-3 pt-2">
-        <button
-          type="button"
-          @click="closeDeleteModal"
-          class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold text-sm transition cursor-pointer"
-        >
-          Hủy
-        </button>
-        <button
-          type="button"
-          @click="confirmDelete"
-          class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-sm shadow-md transition cursor-pointer"
-        >
-          Xóa vĩnh viễn
-        </button>
-      </div>
-    </div>
+    <TaskDeleteModal
+      :is-open="isDeleteModalOpen"
+      :is-force-delete="true"
+      @close="isDeleteModalOpen = false"
+      @confirm="handleConfirmForceDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import api from '../services/api';
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed } from 'vue';
 import TaskSearch from './TaskSearch.vue';
 import Pagination from './Pagination.vue';
+import TaskCard from './tasks/TaskCard.vue';
+import TaskDeleteModal from './tasks/TaskDeleteModal.vue';
+import TaskEmpty from './tasks/TaskEmpty.vue';
 
-const errorMessage = ref('');
-const successMessage = ref('');
+import { useTasks } from '@/composables/useTasks';
+import { taskApi } from '@/services/taskApi';
+import type { Task } from '@/types/tasks.ts';
 
-const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return '';
-  return dateStr.split('T')[0]?.split(' ')[0] ?? '';
-};
+const {
+  tasks,
+  keyword,
+  currentPage,
+  lastPage,
+  totalTasks,
+  isLoading,
+  errorMessage,
+  successMessage,
+  gotoPage,
+  restoreTask,
+  forceDeleteTask,
+  fetchTasks,
+} = useTasks(true);
 
-interface Task {
-  id: number;
-  title: string;
-  description: string | null;
-  status: 'todo' | 'doing' | 'done';
-  due_date: string | null;
-  is_overdue: boolean;
-}
-
-const tasks = ref<Task[]>([]);
 const selectedTaskIds = ref<number[]>([]);
-const keyword = ref('');
-
-const isDeleteModalOpen = ref(false);
-const taskToDelete = ref<Task | null>(null);
-
-const openDeleteModal = (task: Task) => {
-  taskToDelete.value = task;
-  isDeleteModalOpen.value = true;
-};
-
-const closeDeleteModal = () => {
-  isDeleteModalOpen.value = false;
-  taskToDelete.value = null;
-};
-
-const confirmDelete = async () => {
-  if (taskToDelete.value) {
-    await handleDeleteTask(taskToDelete.value);
-    closeDeleteModal();
-  }
-};
-
-const validTasks = computed(() =>
-  tasks.value.filter((t): t is Task => t !== null && t !== undefined)
-);
 
 const isSelectAll = computed(() => {
-  return validTasks.value.length > 0 && selectedTaskIds.value.length === validTasks.value.length;
+  return tasks.value.length > 0 && selectedTaskIds.value.length === tasks.value.length;
 });
 
 const toggleSelectAll = () => {
   if (isSelectAll.value) {
     selectedTaskIds.value = [];
   } else {
-    selectedTaskIds.value = validTasks.value.map((task) => task.id);
+    selectedTaskIds.value = tasks.value.map((t) => t.id);
   }
 };
 
-const handleApiError = (error: any, defaultMessage: string) => {
-  if (error.response?.data) {
-    if (error.response.data.errors) {
-      const firstErrorKey = Object.keys(error.response.data.errors)[0];
-      if (firstErrorKey) {
-        errorMessage.value = error.response.data.errors[firstErrorKey][0];
-      }
-    } else {
-      errorMessage.value = error.response.data.message || defaultMessage;
-    }
+const toggleSelectTask = (taskId: number) => {
+  const index = selectedTaskIds.value.indexOf(taskId);
+  if (index > -1) {
+    selectedTaskIds.value.splice(index, 1);
   } else {
-    errorMessage.value = error.message || 'Không thể kết nối đến máy chủ API';
+    selectedTaskIds.value.push(taskId);
   }
 };
 
-const currentPage = ref(1);
-const lastPage = ref(1);
-const totalTasks = ref(0);
-
-const goTo = (page: number) => {
-  handleGetTasksList(page);
-};
-
-let searchTimer: any = null;
-let successTimer: any = null;
-
-watch(successMessage, (newVal) => {
-  if (successTimer) clearTimeout(successTimer);
-  if (newVal) {
-    successTimer = setTimeout(() => {
-      successMessage.value = '';
-    }, 2000);
-  }
-});
-
-watch(keyword, () => {
-  successMessage.value = '';
-  if (searchTimer) clearTimeout(searchTimer);
-
-  searchTimer = setTimeout(() => {
-    handleGetTasksList(1);
-  }, 300);
-});
-
-const handleGetTasksList = async (page: number = 1) => {
+const handleBulkRestore = async () => {
   try {
-    errorMessage.value = '';
-
-    const params: any = { page };
-    if (keyword.value) {
-      params.keyword = keyword.value;
-    }
-
-    const response = await api.get('/tasks/trashed', { params });
-
-    if (response.data?.data) {
-      const rawTasks = Array.isArray(response.data.data) ? response.data.data : [];
-      tasks.value = rawTasks.filter((task: Task | null) => task !== null && task !== undefined);
-      currentPage.value = response.data.meta?.current_page ?? 1;
-      lastPage.value = response.data.meta?.last_page ?? 1;
-      totalTasks.value = response.data.meta?.total ?? tasks.value.length;
-      selectedTaskIds.value = [];
-    }
-  } catch (error: any) {
-    handleApiError(error, 'Lấy danh sách công việc thất bại');
-  }
-};
-
-const handleDeleteTask = async (task: Task) => {
-  try {
-    errorMessage.value = '';
-    successMessage.value = '';
-
-    const response = await api.delete(`/tasks/${task.id}/force`);
-
-    if (response.data) {
-      successMessage.value = response.data.message;
-      await handleGetTasksList();
-    }
-  } catch (error: any) {
-    handleApiError(error, 'Xóa công việc thất bại');
-  }
-};
-
-const handleRestoreTask = async (task: Task) => {
-  try {
-    errorMessage.value = '';
-    successMessage.value = '';
-
-    const response = await api.put(`/tasks/${task.id}/restore`);
-
-    if (response.data) {
-      successMessage.value = response.data.message;
-      await handleGetTasksList();
-    }
-  } catch (error: any) {
-    handleApiError(error, 'Khôi phục công việc thất bại');
-  }
-};
-
-const handleRestoreSelectedTasks = async () => {
-  try {
-    errorMessage.value = '';
-    successMessage.value = '';
-
-    await Promise.all(
-      selectedTaskIds.value.map(async (id) => {
-        return api.put(`/tasks/${id}/restore`);
-      })
-    );
-
+    const res = await taskApi.bulkRestore(selectedTaskIds.value);
+    successMessage.value = res.data.message || 'Đã khôi phục các mục đã chọn';
     selectedTaskIds.value = [];
-    successMessage.value = 'Khôi phục thành công';
-    await handleGetTasksList();
-  } catch (error: any) {
-    handleApiError(error, 'Khôi phục công việc thất bại');
+    await fetchTasks(currentPage.value);
+  } catch (err: any) {
+    errorMessage.value = err.response?.data?.message || 'Khôi phục thất bại';
   }
 };
 
-onMounted(() => {
-  handleGetTasksList();
-});
+const isDeleteModalOpen = ref(false);
+const taskToDelete = ref<Task | null>(null);
+
+const handleOpenForceDeleteModal = (task: Task) => {
+  taskToDelete.value = task;
+  isDeleteModalOpen.value = true;
+};
+
+const handleConfirmForceDelete = async () => {
+  if (taskToDelete.value) {
+    await forceDeleteTask(taskToDelete.value);
+    isDeleteModalOpen.value = false;
+    taskToDelete.value = null;
+  }
+};
 </script>

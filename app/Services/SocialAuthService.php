@@ -11,8 +11,14 @@ use Laravel\Socialite\Socialite;
 
 class SocialAuthService
 {
-    private const EXCHANGE_CODE_TTL_SECONDS = 60;
+    private const int EXCHANGE_CODE_TTL_SECONDS = 60;
 
+    /**
+     * Find an existing user by email and link their social account.
+     *
+     *
+     * @throws Exception
+     */
     public function findOrLinkUser(string $provider, SocialiteUser $socialUser): User
     {
         $email = $socialUser->getEmail();
@@ -54,6 +60,9 @@ class SocialAuthService
         return $user;
     }
 
+    /**
+     * Handle the social provider callback logic and return a generated exchange code.
+     */
     public function handleCallback(string $provider): string
     {
         $socialUser = Socialite::driver($provider)->user();
@@ -66,6 +75,9 @@ class SocialAuthService
         return $this->createExchangeCode($user);
     }
 
+    /**
+     * Verify the one-time exchange code and issue a Sanctum bearer token.
+     */
     public function exchangeCode(string $code): ?array
     {
         $cacheKey = "social_exchange_{$code}";
@@ -75,11 +87,7 @@ class SocialAuthService
             return null;
         }
 
-        $user = User::find($userId);
-
-        if (! $user) {
-            return null;
-        }
+        $user = User::findOrFail($userId);
 
         return [
             'token' => $user->createToken('social-login')->plainTextToken,
@@ -87,6 +95,9 @@ class SocialAuthService
         ];
     }
 
+    /**
+     * Create a secure one-time exchange code and store it in Cache.
+     */
     private function createExchangeCode(User $user): string
     {
         $code = str()->random(40);

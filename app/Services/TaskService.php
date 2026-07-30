@@ -109,6 +109,20 @@ class TaskService
         return $task->refresh()->load('user');
     }
 
+    public function bulkRestore(User $user, array $data): int
+    {
+        $ids = $data['ids'] ?? [];
+
+        if (empty($ids)) {
+            return 0;
+        }
+
+        $query = Task::onlyTrashed()->whereIn('id', $ids);
+        $this->applyUserScope($query, $user);
+
+        return $query->restore();
+    }
+
     public function delete(Task $task): bool
     {
         return $task->delete();
