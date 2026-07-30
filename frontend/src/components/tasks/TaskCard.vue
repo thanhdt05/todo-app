@@ -35,7 +35,7 @@
       </span>
     </div>
 
-    <div class="mx-3 shrink-0">
+    <div class="mx-3 shrink-0 flex items-center space-x-1.5">
       <span
         class="px-2.5 py-1 text-xs font-bold rounded-full uppercase"
         :class="{
@@ -45,6 +45,16 @@
         }"
       >
         {{ task.status }}
+      </span>
+      <span
+        class="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase"
+        :class="{
+          'bg-slate-200 text-slate-700': task.priority === 'low',
+          'bg-yellow-100 text-yellow-800': task.priority === 'medium',
+          'bg-rose-100 text-rose-700 font-extrabold': task.priority === 'high',
+        }"
+      >
+        {{ task.priority || 'medium' }}
       </span>
     </div>
 

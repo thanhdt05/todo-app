@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Services\SocialAuthService;
 use App\Traits\HttpResponse;
 use Illuminate\Http\JsonResponse;
@@ -85,11 +86,10 @@ class SocialAuthController extends Controller
             return $this->error('Mã xác thực không hợp lệ hoặc đã hết hạn', 400);
         }
 
-        return $this->success(
-            $result,
-            'Đăng nhập thành công',
-            200
-        );
+        return $this->success([
+            'token' => $result['token'],
+            'user' => UserResource::make($result['user']),
+        ], 'Đăng nhập thành công');
     }
 
     /**

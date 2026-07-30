@@ -14,6 +14,7 @@ export function useTaskForm(onSuccessCallback?: () => void) {
     description: '',
     due_date: '',
     status: 'todo',
+    priority: 'medium',
   });
 
   const formatDate = (dateStr: string | null): string => {
@@ -37,6 +38,7 @@ export function useTaskForm(onSuccessCallback?: () => void) {
       description: '',
       due_date: '',
       status: 'todo',
+      priority: 'medium',
     };
     isModalOpen.value = true;
   };
@@ -50,6 +52,7 @@ export function useTaskForm(onSuccessCallback?: () => void) {
       description: task.description || '',
       due_date: formatDate(task.due_date),
       status: task.status,
+      priority: task.priority || 'medium',
     };
     isModalOpen.value = true;
   };
@@ -63,6 +66,7 @@ export function useTaskForm(onSuccessCallback?: () => void) {
       description: task.description || '',
       due_date: formatDate(task.due_date),
       status: task.status,
+      priority: task.priority || 'medium',
     };
     isModalOpen.value = true;
   };

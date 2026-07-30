@@ -5,12 +5,12 @@ import type { Task, TaskFilters, TaskPayload } from '@/types/tasks';
 import type { ApiResponse, PaginatedApiResponse } from '@/types/api';
 
 export const taskApi = {
-  list(filters: TaskFilters = {}): Promise<AxiosResponse<PaginatedApiResponse<Task>>> {
-    return api.get('/tasks', { params: filters });
+  list(filters: TaskFilters = {}, signal?: AbortSignal): Promise<AxiosResponse<PaginatedApiResponse<Task>>> {
+    return api.get('/tasks', { params: filters, signal });
   },
 
-  listTrashed(filters: TaskFilters = {}): Promise<AxiosResponse<PaginatedApiResponse<Task>>> {
-    return api.get('/tasks/trashed', { params: filters });
+  listTrashed(filters: TaskFilters = {}, signal?: AbortSignal): Promise<AxiosResponse<PaginatedApiResponse<Task>>> {
+    return api.get('/tasks/trashed', { params: filters, signal });
   },
 
   get(id: number): Promise<AxiosResponse<ApiResponse<Task>>> {

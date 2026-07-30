@@ -1,11 +1,14 @@
 import { ref, watch, onMounted } from 'vue';
 import { taskApi } from '@/services/taskApi';
-import type { Task, TaskTab, TaskFilters } from '@/types/tasks';
+import type { Task, TaskTab, TaskFilters, TaskPriority } from '@/types/tasks';
 
 export function useTasks(isTrashedMode: boolean = false) {
   const tasks = ref<Task[]>([]);
   const keyword = ref('');
   const currentTab = ref<TaskTab>('ALL');
+  const priorityFilter = ref<TaskPriority | ''>('');
+  const sortBy = ref<'created_at' | 'due_date' | 'priority' | 'title'>('created_at');
+  const sortDirection = ref<'asc' | 'desc'>('desc');
   const currentPage = ref(1);
   const lastPage = ref(1);
   const totalTasks = ref(0);
@@ -44,8 +47,15 @@ export function useTasks(isTrashedMode: boolean = false) {
     }
 
     activeAbortController = new AbortController();
+    const signal = activeAbortController.signal;
 
-    const filters: TaskFilters = { page, per_page: 5 };
+    const filters: TaskFilters = {
+      page,
+      per_page: 5,
+      sort: sortBy.value,
+      direction: sortDirection.value,
+    };
+
     if (keyword.value.trim()) {
       filters.keyword = keyword.value.trim();
     }
@@ -54,10 +64,14 @@ export function useTasks(isTrashedMode: boolean = false) {
       filters.status = currentTab.value.toLowerCase();
     }
 
+    if (priorityFilter.value) {
+      filters.priority = priorityFilter.value;
+    }
+
     try {
       const response = isTrashedMode
-        ? await taskApi.listTrashed(filters)
-        : await taskApi.list(filters);
+        ? await taskApi.listTrashed(filters, signal)
+        : await taskApi.list(filters, signal);
 
       if (response.data?.data) {
         tasks.value = response.data.data;
@@ -83,7 +97,7 @@ export function useTasks(isTrashedMode: boolean = false) {
     }
   });
 
-  watch([keyword, currentTab], () => {
+  watch([keyword, currentTab, priorityFilter, sortBy, sortDirection], () => {
     if (searchTimer) clearTimeout(searchTimer);
 
     searchTimer = setTimeout(() => {
@@ -148,6 +162,9 @@ export function useTasks(isTrashedMode: boolean = false) {
     tasks,
     keyword,
     currentTab,
+    priorityFilter,
+    sortBy,
+    sortDirection,
     currentPage,
     lastPage,
     totalTasks,

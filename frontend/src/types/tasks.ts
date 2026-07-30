@@ -1,4 +1,5 @@
 export type TaskStatus = 'todo' | 'doing' | 'done';
+export type TaskPriority = 'low' | 'medium' | 'high';
 export type TaskTab = 'ALL' | 'TODO' | 'DOING' | 'DONE';
 
 export interface Task {
@@ -6,6 +7,7 @@ export interface Task {
   title: string;
   description: string;
   status: TaskStatus;
+  priority: TaskPriority;
   due_date: string | null;
   completed_at: string | null;
   created_at: string;
@@ -19,6 +21,7 @@ export interface TaskPayload {
   description?: string;
   due_date?: string | null;
   status?: TaskStatus;
+  priority?: TaskPriority;
 }
 
 export interface TaskFilters {
@@ -26,4 +29,7 @@ export interface TaskFilters {
   per_page?: number;
   keyword?: string;
   status?: string;
+  priority?: string;
+  sort?: string;
+  direction?: 'asc' | 'desc';
 }

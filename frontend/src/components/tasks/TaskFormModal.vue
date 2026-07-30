@@ -73,7 +73,7 @@
           ></textarea>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1"
               >Hạn hoàn thành</label
@@ -82,7 +82,7 @@
               v-model="taskForm.due_date"
               :disabled="!isEditMode"
               type="date"
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 text-sm"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 text-sm"
             />
           </div>
           <div>
@@ -92,11 +92,25 @@
             <select
               v-model="taskForm.status"
               :disabled="!isEditMode"
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 text-sm"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 text-sm"
             >
               <option value="todo">Todo</option>
               <option value="doing">Doing</option>
               <option value="done">Done</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1"
+              >Ưu tiên</label
+            >
+            <select
+              v-model="taskForm.priority"
+              :disabled="!isEditMode"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 text-sm"
+            >
+              <option value="low">Thấp</option>
+              <option value="medium">Trung bình</option>
+              <option value="high">Cao</option>
             </select>
           </div>
         </div>

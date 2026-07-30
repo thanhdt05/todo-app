@@ -6,7 +6,6 @@ import TaskLayout from '@/components/TaskLayout.vue';
 import TrashedTasksList from '@/components/TrashedTasksList.vue';
 import Profile from '@/components/Profile.vue';
 import AuthCallback from '@/components/AuthCallback.vue';
-import { isToken } from 'typescript';
 
 const routes = [
   {

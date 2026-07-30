@@ -25,7 +25,40 @@
       {{ successMessage }}
     </div>
 
-    <TaskFilters v-model="currentTab" />
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <TaskFilters v-model="currentTab" />
+
+      <div class="flex items-center space-x-2 pb-3 text-xs sm:text-sm">
+        <select
+          v-model="priorityFilter"
+          class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 bg-white focus:outline-none focus:border-cyan-500 font-medium"
+        >
+          <option value="">Tất cả</option>
+          <option value="high">Cao</option>
+          <option value="medium">Trung bình</option>
+          <option value="low">Thấp</option>
+        </select>
+
+        <select
+          v-model="sortBy"
+          class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 bg-white focus:outline-none focus:border-cyan-500 font-medium"
+        >
+          <option value="created_at">Ngày tạo</option>
+          <option value="due_date">Hạn chót</option>
+          <option value="priority">Độ ưu tiên</option>
+          <option value="title">Tiêu đề</option>
+        </select>
+
+        <button
+          type="button"
+          @click="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'"
+          class="px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition font-bold"
+          :title="sortDirection === 'asc' ? 'Sắp xếp Tăng dần' : 'Sắp xếp Giảm dần'"
+        >
+          {{ sortDirection === 'asc' ? '↑' : '↓' }}
+        </button>
+      </div>
+    </div>
 
     <TaskEmpty
       v-if="!isLoading && tasks.length === 0"
@@ -90,6 +123,9 @@ const {
   tasks,
   keyword,
   currentTab,
+  priorityFilter,
+  sortBy,
+  sortDirection,
   currentPage,
   lastPage,
   totalTasks,

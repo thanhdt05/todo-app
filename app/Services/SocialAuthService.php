@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\UserResource;
 use App\Models\SocialAccount;
 use App\Models\User;
 use Exception;

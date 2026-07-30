@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Models\Task;
 use App\Models\User;
@@ -11,18 +12,15 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class TaskService
 {
     /**
-     * @param  array{keyword?: string, status?: string, per_page?: int}  $filters
+     * @param  array{keyword?: string, status?: string, priority?: string, sort?: string, direction?: string, per_page?: int}  $filters
      */
     public function getAll(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = Task::query()->with('user')->latest();
+        $query = Task::query()->with('user');
 
         $this->applyUserScope($query, $user);
         $this->keywordFilter($query, $filters['keyword'] ?? null);
-
-        if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
+        $this->applyFiltersAndSorting($query, $filters);
 
         return $query->paginate(
             $this->getPerPage($filters)
@@ -30,14 +28,15 @@ class TaskService
     }
 
     /**
-     * @param  array{keyword?: string, per_page?: int}  $filters
+     * @param  array{keyword?: string, priority?: string, sort?: string, direction?: string, per_page?: int}  $filters
      */
     public function getAllTrashed(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = Task::query()->with('user')->onlyTrashed()->latest();
+        $query = Task::query()->with('user')->onlyTrashed();
 
         $this->applyUserScope($query, $user);
         $this->keywordFilter($query, $filters['keyword'] ?? null);
+        $this->applyFiltersAndSorting($query, $filters);
 
         return $query->paginate(
             $this->getPerPage($filters)
@@ -68,11 +67,16 @@ class TaskService
             ? TaskStatus::from($data['status'])
             : TaskStatus::TODO;
 
+        $priority = isset($data['priority'])
+            ? TaskPriority::from($data['priority'])
+            : TaskPriority::MEDIUM;
+
         return $user->tasks()->create([
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'due_date' => $data['due_date'] ?? null,
             'status' => $status,
+            'priority' => $priority,
             'completed_at' => $status === TaskStatus::DONE ? now() : null,
         ])->load('user');
     }
@@ -86,6 +90,10 @@ class TaskService
             $data['completed_at'] = $newStatus === TaskStatus::DONE ? ($task->completed_at ?? now()) : null;
         }
 
+        if (array_key_exists('priority', $data)) {
+            $data['priority'] = TaskPriority::from($data['priority']);
+        }
+
         $task->update($data);
 
         return $task->refresh()->load('user');
@@ -93,7 +101,6 @@ class TaskService
 
     public function complete(Task $task): Task
     {
-
         $task->update([
             'status' => TaskStatus::DONE,
             'completed_at' => $task->completed_at ?? now(),
@@ -140,13 +147,35 @@ class TaskService
         }
     }
 
+    private function applyFiltersAndSorting(Builder $query, array $filters): void
+    {
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['priority'])) {
+            $query->where('priority', $filters['priority']);
+        }
+
+        $sort = $filters['sort'] ?? 'created_at';
+        $direction = strtolower($filters['direction'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+
+        $allowedSorts = ['due_date', 'created_at', 'priority', 'title'];
+        if (in_array($sort, $allowedSorts, true)) {
+            $query->orderBy($sort, $direction);
+        } else {
+            $query->latest();
+        }
+    }
+
     private function keywordFilter(Builder $query, ?string $keyword): void
     {
         if (blank($keyword)) {
             return;
         }
 
-        $keyword = trim($keyword);
+        $keyword = mb_strtolower(trim($keyword));
+
         $query->where(function (Builder $query) use ($keyword) {
             $query->where('title', 'ILIKE', "%{$keyword}%")
                 ->orWhere('description', 'ILIKE', "%{$keyword}%");

@@ -7,7 +7,7 @@ use App\Http\Requests\BulkRestoreTaskRequest;
 use App\Http\Requests\IndexTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
-use App\Http\Resources\TasksResource;
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Services\TaskService;
 use App\Traits\HttpResponse;
@@ -28,11 +28,14 @@ class TaskController extends Controller
         $tasks = $this->taskService->getAll($request->user(), [
             'keyword' => $request->input('keyword'),
             'status' => $request->input('status'),
+            'priority' => $request->input('priority'),
+            'sort' => $request->input('sort'),
+            'direction' => $request->input('direction'),
             'per_page' => $request->input('per_page'),
         ]);
 
         return $this->paginated(
-            TasksResource::collection($tasks),
+            TaskResource::collection($tasks),
             'Lấy danh sách thành công'
         );
     }
@@ -42,11 +45,14 @@ class TaskController extends Controller
         $this->authorize('viewAny', Task::class);
         $tasks = $this->taskService->getAllTrashed($request->user(), [
             'keyword' => $request->input('keyword'),
+            'priority' => $request->input('priority'),
+            'sort' => $request->input('sort'),
+            'direction' => $request->input('direction'),
             'per_page' => $request->input('per_page'),
         ]);
 
         return $this->paginated(
-            TasksResource::collection($tasks),
+            TaskResource::collection($tasks),
             'Lấy danh sách đã xóa thành công'
         );
     }
@@ -61,7 +67,7 @@ class TaskController extends Controller
         $task = $this->taskService->create($request->user(), $request->validated());
 
         return $this->success(
-            TasksResource::make($task),
+            TaskResource::make($task),
             'Thêm mới thành công',
             201
         );
@@ -76,7 +82,7 @@ class TaskController extends Controller
         $this->authorize('view', $task);
 
         return $this->success(
-            TasksResource::make($task),
+            TaskResource::make($task),
             'Lấy thông tin thành công'
         );
     }
@@ -92,7 +98,7 @@ class TaskController extends Controller
         $updatedTask = $this->taskService->update($task, $request->validated());
 
         return $this->success(
-            TasksResource::make($updatedTask),
+            TaskResource::make($updatedTask),
             'Cập nhật thành công'
         );
     }
@@ -105,7 +111,7 @@ class TaskController extends Controller
         $restoredTask = $this->taskService->restore($task);
 
         return $this->success(
-            TasksResource::make($restoredTask),
+            TaskResource::make($restoredTask),
             'Khôi phục thành công'
         );
     }
@@ -130,7 +136,7 @@ class TaskController extends Controller
         $completedTask = $this->taskService->complete($task);
 
         return $this->success(
-            TasksResource::make($completedTask),
+            TaskResource::make($completedTask),
             'Cập nhật trạng thái thành công'
         );
     }

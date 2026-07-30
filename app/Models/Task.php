@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ class Task extends Model
         'title',
         'description',
         'status',
+        'priority',
         'due_date',
         'completed_at',
     ];
@@ -28,6 +30,7 @@ class Task extends Model
             'due_date' => 'datetime',
             'completed_at' => 'datetime',
             'status' => TaskStatus::class,
+            'priority' => TaskPriority::class,
         ];
     }
 

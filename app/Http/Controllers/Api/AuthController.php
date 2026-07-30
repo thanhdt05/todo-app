@@ -23,7 +23,7 @@ class AuthController extends Controller
         $data = $this->authService->register($request->validated());
 
         return $this->success([
-            'user' => $data['user'],
+            'user' => UserResource::make($data['user']),
             'token' => $data['token'],
         ], 'Đăng ký thành công', 201);
     }
@@ -33,7 +33,7 @@ class AuthController extends Controller
         $data = $this->authService->login($request->validated());
 
         return $this->success([
-            'user' => $data['user'],
+            'user' => UserResource::make($data['user']),
             'token' => $data['token'],
         ], 'Đăng nhập thành công');
     }
