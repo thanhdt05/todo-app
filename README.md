@@ -1,8 +1,8 @@
 # TODO APP API & FRONTEND
 
-Ứng dụng quản lý công việc full-stack sử dụng **Laravel 13 REST API**, **Vue 3**, **TypeScript** và **PostgreSQL**.
+Ứng dụng quản lý công việc full-stack sử dụng **Laravel 13 REST API**, **Vue 3**, **TypeScript**, **PostgreSQL**, **Redis** và **Laravel Horizon**.
 
-Dự án hỗ trợ xác thực bằng email/mật khẩu, đăng nhập Google/Microsoft, quản lý vòng đời công việc, phân quyền theo người dùng, tìm kiếm, lọc, phân trang phía server và thùng rác với cơ chế Soft Delete.
+Dự án hỗ trợ xác thực bằng email/mật khẩu, đăng nhập Google/Microsoft, quản lý vòng đời công việc, phân quyền RBAC (Spatie), tìm kiếm, lọc, phân trang phía server, thùng rác Soft Delete, cùng **hệ thống tự động thông báo nhắc nhở công việc sắp đến hạn qua Queue & Email**.
 
 ---
 
@@ -10,10 +10,10 @@ Dự án hỗ trợ xác thực bằng email/mật khẩu, đăng nhập Google/
 
 ### Xác thực và tài khoản
 
-- Đăng ký tài khoản bằng email và mật khẩu.
+- Đăng ký tài khoản bằng email và mật khẩu (tự động gán role `user` mặc định trong DB transaction).
 - Đăng nhập API bằng Laravel Sanctum Bearer Token.
 - Đăng xuất và thu hồi token đang sử dụng.
-- Xem thông tin tài khoản hiện tại.
+- Xem thông tin tài khoản hiện tại kèm danh sách `roles` và `permissions`.
 - Đăng nhập bằng Google hoặc Microsoft thông qua Laravel Socialite.
 - Liên kết tài khoản mạng xã hội theo email đã tồn tại trong bảng `users`.
 - Sử dụng mã trao đổi một lần (`exchange_code`) thay vì đưa Sanctum token trực tiếp lên URL callback.
@@ -28,16 +28,26 @@ Dự án hỗ trợ xác thực bằng email/mật khẩu, đăng nhập Google/
   - `todo`: Chưa làm.
   - `doing`: Đang làm.
   - `done`: Hoàn thành.
-- Lưu ngày hết hạn và thời điểm hoàn thành.
+- Ba mức độ ưu tiên: `low`, `medium`, `high`.
+- Lưu ngày hết hạn (`due_date`), thời điểm hoàn thành (`completed_at`), và thời điểm phát thông báo (`reminder_sent_at`).
 - Tự động xác định công việc quá hạn qua trường `is_overdue`.
 - Đánh dấu hoàn thành bằng endpoint riêng.
 - Tìm kiếm theo tiêu đề hoặc mô tả.
-- Lọc theo trạng thái.
+- Lọc theo trạng thái và mức độ ưu tiên.
 - Phân trang phía server, hỗ trợ thay đổi `per_page` từ 1 đến 100.
 - Soft Delete và danh sách thùng rác.
-- Khôi phục một công việc.
-- Khôi phục hàng loạt tối đa 50 công việc mỗi request.
+- Khôi phục một công việc hoặc hàng loạt công việc.
 - Xóa vĩnh viễn công việc trong thùng rác.
+
+### Hàng đợi Queue, Thông báo & Horizon
+
+- **Tự động nhắc nhở (Task Reminders)**: Laravel Scheduler chạy hàng giờ quét các Task chưa hoàn thành có `due_date` trong vòng 24 giờ tới để đẩy Job gửi thông báo.
+- **Async Queue Processing**: Đẩy `SendTaskReminder` Job vào Redis Queue xử lý bất đồng bộ, dùng khóa Redis (`WithoutOverlapping`) tránh gửi trùng.
+- **Thông báo đa kênh (Notifications)**:
+  - **Database Notification**: Lưu thông báo vào bảng `notifications` để hiển thị trên giao diện hoặc qua API `GET /api/notifications`.
+  - **Email Notification**: Gửi Email HTML thông báo tới người dùng với link liên kết trực tiếp tới ứng dụng.
+- **Laravel Horizon Dashboard**: Giao diện quản lý & giám sát Queue realtime tại `http://localhost:8000/horizon`.
+- **Thử nghiệm Email với Mailpit**: Tích hợp hòm thư Mailpit Web Inbox tại `http://localhost:8025` để xem giao diện Email HTML thử nghiệm trực quan.
 
 ### Phân quyền và bảo mật
 
@@ -58,15 +68,18 @@ Dự án hỗ trợ xác thực bằng email/mật khẩu, đăng nhập Google/
 
 | Thành phần            | Công nghệ                                       |
 | --------------------- | ----------------------------------------------- |
-| Backend               | PHP 8.3+, Laravel 13                            |
+| Backend               | PHP 8.4, Laravel 13                             |
 | API Authentication    | Laravel Sanctum                                 |
 | Social Authentication | Laravel Socialite, SocialiteProviders Microsoft |
+| Authorization         | Spatie Laravel Permission (RBAC)                |
+| Queue & Caching       | Redis 7, Laravel Horizon                        |
+| Mail Testing          | Mailpit                                         |
 | Database              | PostgreSQL 16                                   |
 | Frontend              | Vue 3, TypeScript, Vue Router                   |
 | HTTP Client           | Axios                                           |
 | UI                    | Tailwind CSS 4                                  |
 | Build Tool            | Vite 8                                          |
-| Backend Testing       | PHPUnit, Pest                                   |
+| Backend Testing       | PHPUnit, Pest PHP                               |
 | Code Formatting       | Laravel Pint                                    |
 | Container             | Docker, Docker Compose                          |
 
@@ -369,10 +382,12 @@ docker compose exec todoapp php artisan migrate:fresh --seed
 ### 8. Truy cập ứng dụng
 
 ```text
-Frontend: http://localhost:5173
-Backend:  http://localhost:8000
-API:      http://localhost:8000/api
-Health:   http://localhost:8000/up
+Frontend:        http://localhost:5173
+Backend:         http://localhost:8000
+API:             http://localhost:8000/api
+Laravel Horizon: http://localhost:8000/horizon (Dashboard quản lý Queue)
+Mailpit Web UI:  http://localhost:8025         (Hòm thư xem Email thử nghiệm)
+Health:          http://localhost:8000/up
 ```
 
 ---
@@ -394,10 +409,25 @@ Sau khi chạy `php artisan migrate:fresh --seed`, có thể sử dụng các t�
 
 ## Test và kiểm tra chất lượng
 
-### Backend tests
+### 1. Kiểm thử Email & Horizon Queue thủ công
+
+- **Mailpit Web UI**: Truy cập `http://localhost:8025` để xem toàn bộ Email thông báo được gửi dưới dạng giao diện HTML trực quan.
+- **Laravel Horizon**: Truy cập `http://localhost:8000/horizon` (tài khoản Admin) để theo dõi các Job được xử lý realtime trên Redis.
+- **Chạy thử Command nhắc nhở thủ công**:
+  ```bash
+  docker compose exec todoapp php artisan tasks:dispatch-reminders
+  ```
+
+### 2. Backend tests (Pest PHP)
 
 ```bash
 docker compose exec todoapp php artisan test
+```
+
+Chạy riêng test nhắc nhở Task Reminder:
+
+```bash
+docker compose exec todoapp php artisan test --filter=TaskReminderTest
 ```
 
 Bộ test hiện có bao phủ các nhóm chính:
@@ -405,6 +435,7 @@ Bộ test hiện có bao phủ các nhóm chính:
 - Register, login, login sai mật khẩu và profile.
 - Task CRUD và phân trang.
 - Task trong thùng rác, restore và force delete.
+- Task Reminders, Job dispatching và Notification assertion.
 - Validation dữ liệu không hợp lệ.
 - Ngăn người dùng truy cập hoặc chỉnh sửa task của người khác.
 - Mock Social OAuth cho Google và Microsoft.
