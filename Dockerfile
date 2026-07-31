@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     git \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
-    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite
+    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite pcntl posix
 
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

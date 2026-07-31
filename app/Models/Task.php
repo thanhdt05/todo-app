@@ -22,6 +22,7 @@ class Task extends Model
         'priority',
         'due_date',
         'completed_at',
+        'reminder_sent_at',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class Task extends Model
             'completed_at' => 'datetime',
             'status' => TaskStatus::class,
             'priority' => TaskPriority::class,
+            'reminder_sent_at' => 'datetime',
         ];
     }
 

@@ -111,6 +111,15 @@ class TaskService
             $data['priority'] = TaskPriority::from($data['priority']);
         }
 
+        if (array_key_exists('due_date', $data)) {
+            $newDueDate = $data['due_date'];
+            $oldDueDate = $task->due_date?->toDateTimeString();
+
+            if ($newDueDate !== $oldDueDate) {
+                $data['reminder_sent_at'] = null;
+            }
+        }
+
         $task->update($data);
 
         return $task->refresh()->load('user');
@@ -135,7 +144,7 @@ class TaskService
 
     public function bulkRestore(Collection $tasks): int
     {
-        if (empty($tasks)) {
+        if ($tasks->isEmpty()) {
             return 0;
         }
 

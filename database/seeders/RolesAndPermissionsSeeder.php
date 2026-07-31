@@ -15,65 +15,56 @@ class RolesAndPermissionsSeeder extends Seeder
 
     public function run(): void
     {
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $registrar = app(PermissionRegistrar::class);
+        $registrar->forgetCachedPermissions();
 
         foreach (TaskPermission::cases() as $permission) {
-            Permission::firstOrCreate([
-                'name' => $permission->value,
-                'guard_name' => self::GUARD,
-            ]);
+            Permission::findOrCreate(
+                $permission->value,
+                self::GUARD
+            );
         }
 
-        $admin = Role::firstOrCreate([
-            'name' => RoleName::ADMIN->value,
-            'guard_name' => self::GUARD,
-        ]);
+        $registrar->forgetCachedPermissions();
 
-        $manager = Role::firstOrCreate([
-            'name' => RoleName::MANAGER->value,
-            'guard_name' => self::GUARD,
-        ]);
+        $admin = Role::findOrCreate(
+            RoleName::ADMIN->value,
+            self::GUARD
+        );
 
-        $user = Role::firstOrCreate([
-            'name' => RoleName::USER->value,
-            'guard_name' => self::GUARD,
-        ]);
+        $manager = Role::findOrCreate(
+            RoleName::MANAGER->value,
+            self::GUARD
+        );
 
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $user = Role::findOrCreate(
+            RoleName::USER->value,
+            self::GUARD
+        );
 
         $admin->syncPermissions(TaskPermission::values());
 
-        $manager->syncPermissions(array_map(
-            static fn (TaskPermission $permission): string => $permission->value,
-            [
-                TaskPermission::VIEW_ALL,
-                TaskPermission::VIEW_OWN,
-                TaskPermission::VIEW_TRASHED_ALL,
-                TaskPermission::VIEW_TRASHED_OWN,
-                TaskPermission::CREATE,
-                TaskPermission::UPDATE_ALL,
-                TaskPermission::UPDATE_OWN,
-                TaskPermission::COMPLETE_ALL,
-                TaskPermission::COMPLETE_OWN,
-                TaskPermission::DELETE_OWN,
-                TaskPermission::RESTORE_ALL,
-                TaskPermission::RESTORE_OWN,
-            ]
-        ));
+        $manager->syncPermissions([
+            TaskPermission::VIEW_ALL->value,
+            TaskPermission::VIEW_TRASHED_ALL->value,
+            TaskPermission::CREATE->value,
+            TaskPermission::UPDATE_ALL->value,
+            TaskPermission::COMPLETE_ALL->value,
+            TaskPermission::DELETE_ALL->value,
+            TaskPermission::RESTORE_ALL->value,
+        ]);
 
-        $user->syncPermissions(array_map(
-            static fn (TaskPermission $permission): string => $permission->value,
-            [
-                TaskPermission::VIEW_OWN,
-                TaskPermission::VIEW_TRASHED_OWN,
-                TaskPermission::CREATE,
-                TaskPermission::UPDATE_OWN,
-                TaskPermission::COMPLETE_OWN,
-                TaskPermission::DELETE_OWN,
-                TaskPermission::RESTORE_OWN,
-            ]
-        ));
+        $user->syncPermissions([
+            TaskPermission::VIEW_OWN->value,
+            TaskPermission::VIEW_TRASHED_OWN->value,
+            TaskPermission::CREATE->value,
+            TaskPermission::UPDATE_OWN->value,
+            TaskPermission::COMPLETE_OWN->value,
+            TaskPermission::DELETE_OWN->value,
+            TaskPermission::RESTORE_OWN->value,
+        ]);
 
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $registrar->forgetCachedPermissions();
     }
 }
+

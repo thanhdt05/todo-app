@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('status')->default('todo');
             $table->timestamp('due_date')->nullable();
             $table->timestamp('completed_at')->nullable();
+            $table->timestamp('reminder_sent_at')->nullable()->index();
             $table->timestamps();
             $table->softDeletes();
             $table->index(['user_id', 'status']);

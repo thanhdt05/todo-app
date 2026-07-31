@@ -20,7 +20,7 @@ class AuthService
                 'password' => Hash::make($data['password']),
             ]);
 
-            $user->assignRole(RoleName::USER);
+            $user->assignRole(RoleName::USER->value);
 
             $token = $user->createToken('auth_token')->plainTextToken;
 

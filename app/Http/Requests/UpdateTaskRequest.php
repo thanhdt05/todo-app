@@ -38,9 +38,8 @@ class UpdateTaskRequest extends FormRequest
     {
         return [
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự',
-            'description.max' => 'Mô tả không được vượt quá 255 ký tự',
+            'description.max' => 'Mô tả không được vượt quá 1000 ký tự',
             'due_date.date' => 'Ngày hết hạn không hợp lệ',
-            'due_date.after_or_equal' => 'Ngày hết hạn phải lớn hơn hoặc bằng thời gian hiện tại',
             'status.enum' => 'Trạng thái không hợp lệ',
         ];
     }
