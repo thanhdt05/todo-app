@@ -2,67 +2,66 @@
 
 namespace Database\Seeders;
 
-use App\Enums\UserRole;
+use App\Enums\RoleName;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('users')->insert([
+        $users = [
             [
                 'name' => 'test 1',
                 'email' => 'test1@gmail.com',
-                'password' => Hash::make('12345678'),
-                'role' => UserRole::ADMIN->value,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'password' => '12345678',
+                'role' => RoleName::ADMIN,
             ],
             [
                 'name' => 'test 2',
                 'email' => 'test2@gmail.com',
-                'password' => Hash::make('12345678'),
-                'role' => UserRole::ADMIN->value,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'password' => '12345678',
+                'role' => RoleName::ADMIN,
             ],
             [
                 'name' => 'test 3',
                 'email' => 'test3@gmail.com',
-                'password' => Hash::make('12345678'),
-                'role' => UserRole::USER->value,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'password' => '12345678',
+                'role' => RoleName::USER,
             ],
             [
                 'name' => 'test 4',
                 'email' => 'test4@gmail.com',
-                'password' => Hash::make('12345678'),
-                'role' => UserRole::USER->value,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'password' => '12345678',
+                'role' => RoleName::USER,
             ],
             [
                 'name' => 'test 5',
                 'email' => 'test5@gmail.com',
-                'password' => Hash::make('12345678'),
-                'role' => UserRole::USER->value,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'password' => '12345678',
+                'role' => RoleName::USER,
             ],
             [
                 'name' => 'test 6',
                 'email' => 'test6@gmail.com',
-                'password' => Hash::make('12345678'),
-                'role' => UserRole::USER->value,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'password' => '12345678',
+                'role' => RoleName::USER,
             ],
-        ]);
+        ];
+
+        foreach ($users as $data) {
+            $role = $data['role'];
+            unset($data['role']);
+
+            $user = User::query()->updateOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name' => $data['name'],
+                    'password' => $data['password'],
+                ]
+            );
+
+            $user->syncRoles($role);
+        }
     }
 }

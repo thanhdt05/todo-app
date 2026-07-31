@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Enums\TaskPermission;
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class TaskService
@@ -18,7 +21,11 @@ class TaskService
     {
         $query = Task::query()->with('user');
 
-        $this->applyUserScope($query, $user);
+        $this->applyVisibilityScope(
+            query: $query,
+            user: $user,
+            viewAllPermission: TaskPermission::VIEW_ALL
+        );
         $this->keywordFilter($query, $filters['keyword'] ?? null);
         $this->applyFiltersAndSorting($query, $filters);
 
@@ -34,7 +41,11 @@ class TaskService
     {
         $query = Task::query()->with('user')->onlyTrashed();
 
-        $this->applyUserScope($query, $user);
+        $this->applyVisibilityScope(
+            query: $query,
+            user: $user,
+            viewAllPermission: TaskPermission::VIEW_TRASHED_ALL
+        );
         $this->keywordFilter($query, $filters['keyword'] ?? null);
         $this->applyFiltersAndSorting($query, $filters);
 
@@ -43,22 +54,28 @@ class TaskService
         );
     }
 
-    public function findById(User $user, string $id): Task
+    public function findById(string $id): Task
     {
-        $query = Task::query()->with('user');
-
-        $this->applyUserScope($query, $user);
-
-        return $query->findOrFail($id);
+        return Task::query()
+            ->with('user')
+            ->findOrFail($id);
     }
 
-    public function findDeletedById(User $user, string $id): Task
+    public function findDeletedById(string $id): Task
     {
-        $query = Task::query()->with('user')->onlyTrashed();
+        return Task::query()
+            ->with('user')
+            ->onlyTrashed()
+            ->findOrFail($id);
+    }
 
-        $this->applyUserScope($query, $user);
-
-        return $query->findOrFail($id);
+    public function findDeletedByIds(array $ids): Collection
+    {
+        return Task::query()
+            ->with('user')
+            ->onlyTrashed()
+            ->whereKey($ids)
+            ->get();
     }
 
     public function create(User $user, array $data): Task
@@ -116,18 +133,15 @@ class TaskService
         return $task->refresh()->load('user');
     }
 
-    public function bulkRestore(User $user, array $data): int
+    public function bulkRestore(Collection $tasks): int
     {
-        $ids = $data['ids'] ?? [];
-
-        if (empty($ids)) {
+        if (empty($tasks)) {
             return 0;
         }
 
-        $query = Task::onlyTrashed()->whereIn('id', $ids);
-        $this->applyUserScope($query, $user);
-
-        return $query->restore();
+        return Task::onlyTrashed()
+            ->whereKey($tasks->modelKeys())
+            ->restore();
     }
 
     public function delete(Task $task): bool
@@ -140,10 +154,13 @@ class TaskService
         return $task->forceDelete();
     }
 
-    private function applyUserScope(Builder $query, User $user): void
-    {
-        if (! $user->isAdmin()) {
-            $query->where('user_id', $user->id);
+    private function applyVisibilityScope(
+        Builder $query,
+        User $user,
+        TaskPermission $viewAllPermission
+    ): void {
+        if ($user->cannot($viewAllPermission)) {
+            $query->where('user_id', $user->getKey());
         }
     }
 
@@ -175,10 +192,13 @@ class TaskService
         }
 
         $keyword = mb_strtolower(trim($keyword));
+        /** @var Connection $connection */
+        $connection = $query->getConnection();
+        $likeOperator = $connection->getDriverName() === 'pgsql' ? 'ILIKE' : 'LIKE';
 
-        $query->where(function (Builder $query) use ($keyword) {
-            $query->where('title', 'ILIKE', "%{$keyword}%")
-                ->orWhere('description', 'ILIKE', "%{$keyword}%");
+        $query->where(function (Builder $query) use ($keyword, $likeOperator) {
+            $query->where('title', $likeOperator, "%{$keyword}%")
+                ->orWhere('description', $likeOperator, "%{$keyword}%");
         });
     }
 

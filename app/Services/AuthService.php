@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\RoleName;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -11,18 +13,22 @@ class AuthService
 {
     public function register(array $data): array
     {
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        return DB::transaction(function () use ($data): array {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+            ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+            $user->assignRole(RoleName::USER);
 
-        return [
-            'user' => $user,
-            'token' => $token,
-        ];
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return [
+                'user' => $user,
+                'token' => $token,
+            ];
+        });
     }
 
     public function login(array $data): array

@@ -22,25 +22,25 @@ test('cannot access or modify another user task', function () {
 
     actingAs($userA, 'sanctum')
         ->getJson("/api/tasks/{$taskB->id}")
-        ->assertNotFound();
+        ->assertForbidden();
 
     actingAs($userA, 'sanctum')
         ->putJson("/api/tasks/{$taskB->id}", [
             'title' => 'Hacked Title',
         ])
-        ->assertNotFound();
+        ->assertForbidden();
 
     expect($taskB->fresh()->title)->toBe('Original Title');
 
     actingAs($userA, 'sanctum')
         ->putJson("/api/tasks/{$taskB->id}/complete")
-        ->assertNotFound();
+        ->assertForbidden();
 
     expect($taskB->fresh()->status)->toBe(TaskStatus::TODO);
 
     actingAs($userA, 'sanctum')
         ->deleteJson("/api/tasks/{$taskB->id}")
-        ->assertNotFound();
+        ->assertForbidden();
 
     assertDatabaseHas('tasks', [
         'id' => $taskB->id,

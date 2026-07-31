@@ -110,8 +110,7 @@ test('rejects social auth when user email does not exist in database', function 
 
     $response = get("/auth/{$provider}/callback");
 
-    $response->assertRedirectToRoute('login');
-    $response->assertSessionHas('error', 'Không thể đăng nhập bằng '.ucfirst($provider).'. Vui lòng thử lại sau.');
+    $response->assertRedirect(rtrim(config('app.frontend_url'), '/').'/login');
 })->with('providers');
 
 test('prevents linking social account if provider id is already linked to another user', function (string $provider) {
@@ -137,8 +136,7 @@ test('prevents linking social account if provider id is already linked to anothe
 
     $response = get("/auth/{$provider}/callback");
 
-    $response->assertRedirectToRoute('login');
-    $response->assertSessionHas('error');
+    $response->assertRedirect(rtrim(config('app.frontend_url'), '/').'/login');
 })->with('providers');
 
 test('handles canceled or denied oauth grant gracefully', function (string $provider) {

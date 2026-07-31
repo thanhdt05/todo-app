@@ -271,13 +271,14 @@ class TasksFeatureTest extends TestCase
 
     public function test_can_force_delete_task()
     {
-        $user = User::factory()->create();
+        $admin = User::factory()->admin()->create();
+
         $task = Task::factory()->create([
-            'user_id' => $user->id,
+            'user_id' => $admin->id,
             'deleted_at' => now(),
         ]);
 
-        $response = $this->actingAs($user, 'sanctum')->deleteJson('/api/tasks/'.$task->id.'/force');
+        $response = $this->actingAs($admin, 'sanctum')->deleteJson('/api/tasks/'.$task->id.'/force');
 
         $response->assertStatus(200)
             ->assertJsonStructure([

@@ -63,11 +63,9 @@ class SocialAuthController extends Controller
             Log::error("Social authentication failed [{$provider}]: ".$e->getMessage(), [
                 'exception' => $e,
             ]);
+            $frontendUrl = rtrim(config('app.frontend_url'), '/');
 
-            return redirect()->route('login')->with(
-                'error',
-                'Không thể đăng nhập bằng '.ucfirst($provider).'. Vui lòng thử lại sau.'
-            );
+            return redirect()->away("{$frontendUrl}/login");
         }
     }
 

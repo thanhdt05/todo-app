@@ -11,6 +11,7 @@ use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Services\TaskService;
 use App\Traits\HttpResponse;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -42,7 +43,7 @@ class TaskController extends Controller
 
     public function getAllTrashedTasks(IndexTaskRequest $request)
     {
-        $this->authorize('viewAny', Task::class);
+        $this->authorize('viewTrash', Task::class);
         $tasks = $this->taskService->getAllTrashed($request->user(), [
             'keyword' => $request->input('keyword'),
             'priority' => $request->input('priority'),
@@ -78,7 +79,7 @@ class TaskController extends Controller
      */
     public function show(Request $request, string $id)
     {
-        $task = $this->taskService->findById($request->user(), $id);
+        $task = $this->taskService->findById($id);
         $this->authorize('view', $task);
 
         return $this->success(
@@ -92,7 +93,7 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, string $id)
     {
-        $task = $this->taskService->findById($request->user(), $id);
+        $task = $this->taskService->findById($id);
         $this->authorize('update', $task);
 
         $updatedTask = $this->taskService->update($task, $request->validated());
@@ -105,7 +106,7 @@ class TaskController extends Controller
 
     public function restore(Request $request, string $id)
     {
-        $task = $this->taskService->findDeletedById($request->user(), $id);
+        $task = $this->taskService->findDeletedById($id);
         $this->authorize('restore', $task);
 
         $restoredTask = $this->taskService->restore($task);
@@ -120,7 +121,20 @@ class TaskController extends Controller
     {
         $this->authorize('restoreAny', Task::class);
 
-        $restoredCount = $this->taskService->bulkRestore($request->user(), $request->validated());
+        $ids = array_values(array_unique(array_map('intval', $request->validated()['ids'])));
+
+        $tasks = $this->taskService->findDeletedByIds($ids);
+
+        if ($tasks->count() !== count($ids)) {
+            throw (new ModelNotFoundException('Không tìm thấy công việc nào'))
+                ->setModel(Task::class, $ids);
+        }
+
+        foreach ($tasks as $task) {
+            $this->authorize('restore', $task);
+        }
+
+        $restoredCount = $this->taskService->bulkRestore($tasks);
 
         return $this->success(
             ['restored_count' => $restoredCount],
@@ -130,7 +144,7 @@ class TaskController extends Controller
 
     public function complete(Request $request, string $id)
     {
-        $task = $this->taskService->findById($request->user(), $id);
+        $task = $this->taskService->findById($id);
         $this->authorize('complete', $task);
 
         $completedTask = $this->taskService->complete($task);
@@ -143,7 +157,7 @@ class TaskController extends Controller
 
     public function delete(Request $request, string $id)
     {
-        $task = $this->taskService->findById($request->user(), $id);
+        $task = $this->taskService->findById($id);
         $this->authorize('delete', $task);
 
         $this->taskService->delete($task);
@@ -159,7 +173,7 @@ class TaskController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
-        $task = $this->taskService->findDeletedById($request->user(), $id);
+        $task = $this->taskService->findDeletedById($id);
         $this->authorize('forceDelete', $task);
 
         $this->taskService->forceDelete($task);
